@@ -11,15 +11,12 @@
 |
 */
 
-Route::get('/', function () {
-    return 'test';
-});
-
-Route::get('artisan/migrate', function($request) {
-	if ('hackcmm' == request('password')) {
+Route::get('artisan/migrate/{password_migrate}', function($password_migrate) {
+	if ('fuckyou159@aA' == base64_decode($password_migrate)) {
 	    $exitCode = Artisan::call('migrate', [
 		    '--force' => true,
 		]);
+		return $exitCode;
 	} else {
 		return 'You do not have permission.... haha';
 	}
