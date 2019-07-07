@@ -11,6 +11,10 @@
 |
 */
 
+Route::get('/', function () {
+    return 'test';
+});
+
 Route::get('artisan/migrate', function($request) {
 	if ('hackcmm' == request('password')) {
 	    $exitCode = Artisan::call('migrate', [
