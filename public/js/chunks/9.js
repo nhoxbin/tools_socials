@@ -59,13 +59,15 @@ __webpack_require__.r(__webpack_exports__);
         value: 'rank'
       }, {
         text: 'Tên',
-        value: 'name'
+        value: 'name',
+        sortable: false
       }, {
         text: 'Tin nhắn',
-        value: 'messages'
+        value: 'message_count'
       }, {
         text: 'Hành động',
-        value: 'actions'
+        value: 'actions',
+        sortable: false
       }],
       kount: null
     };

@@ -10,6 +10,8 @@ const Reactions = () =>
 	import ('Views/facebook/feed/Reactions');
 const InboxKount = () =>
 	import ('Views/facebook/messenger/Ranking');
+const InboxEveryOne = () =>
+	import ('Views/facebook/messenger/Inboxes');
 const ListGroup = () =>
 	import ('Views/facebook/groups/List');
 const PostGroup = () =>
@@ -92,6 +94,19 @@ export default {
 				breadcrumbInactive: 'Facebook / Messenger /'
 			}, {
 				breadcrumbActive: 'Ranking'
+			}]
+		}
+	}, {
+		path: '/facebook/messenger/inboxes',
+		component: InboxEveryOne,
+		meta: {
+			auth: true,
+			requiresFacebookAccount: true,
+			title: 'message.inbox',
+			breadcrumb: [{
+				breadcrumbInactive: 'Facebook / Messenger /'
+			}, {
+				breadcrumbActive: 'Inbox'
 			}]
 		}
 	}, {

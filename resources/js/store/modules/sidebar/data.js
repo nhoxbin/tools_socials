@@ -36,7 +36,7 @@ export const menus = {
 			path: '/messenger/kount'
 		}, {
 			title: 'message.inbox',
-			path: '/messenger/inbox'
+			path: '/messenger/inboxes'
 		}]
 	}, {
 		action: 'zmdi-comments',

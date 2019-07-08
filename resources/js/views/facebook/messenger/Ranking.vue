@@ -47,9 +47,9 @@ export default {
 			loader: true,
 			headers: [
 				{ text: 'Hạng', value: 'rank' },
-				{ text: 'Tên', value: 'name' },
-				{ text: 'Tin nhắn', value: 'messages' },
-				{ text: 'Hành động', value: 'actions' }
+				{ text: 'Tên', value: 'name', sortable: false },
+				{ text: 'Tin nhắn', value: 'message_count' },
+				{ text: 'Hành động', value: 'actions', sortable: false }
 			],
 			kount: null
 		}

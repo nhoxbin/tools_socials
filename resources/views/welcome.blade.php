@@ -16,7 +16,7 @@
   <!-- <link rel="stylesheet" href="{{ asset('css/scrolltop.css') }}">
   <link rel="stylesheet" href="{{ asset('css/send_sms.css') }}"> -->
 
-  <link rel="stylesheet" type="text/css" href="{{asset('css/app.css')}}">
+  <link rel="stylesheet" type="text/css" href="{{ asset('css/app.css') }}">
   
   <title>{{ config('app.name') }}</title>
 
@@ -30,7 +30,7 @@
 <body>
   <div id="app"></div>
   @routes
-  <script type="text/javascript" src="{{asset('js/main.js')}}"></script>
+  <script type="text/javascript" src="{{ asset('js/main.js') }}"></script>
 
   <!-- my libs js -->
   <!-- <script src="{{ asset('js/functions.js') }}"></script>
