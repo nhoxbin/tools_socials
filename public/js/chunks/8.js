@@ -9,11 +9,6 @@
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 //
 //
 //
@@ -62,54 +57,47 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
- // import UserProfile from "Components/UserProfile"
-
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
-  components: {},
   data: function data() {
     return {
+      search: null,
       loading: false,
-      provider_uid: '',
-      friends: null,
-      getWithType: 'me',
-      types: [{
-        text: "ID của tôi",
-        name: 'me'
+      selected: [],
+      groups: [],
+      headers: [{
+        text: 'Tên',
+        value: 'name'
       }, {
-        text: "ID tùy chọn",
-        name: 'custom'
+        text: 'Số lượng thành viên',
+        value: 'member_count'
+      }, {
+        text: 'Riêng tư',
+        value: 'privacy'
+      }, {
+        text: 'Quyền hạn',
+        value: 'administrator'
+      }, {
+        text: 'Hành động',
+        value: 'actions',
+        sortable: false
       }]
     };
   },
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])({
-    account: 'facebookAccount'
-  })),
   mounted: function mounted() {
-    this.provider_uid = this.account.provider_uid;
-  },
-  watch: {
-    getWithType: function getWithType(value) {
-      if (value === 'me') {
-        this.provider_uid = this.account.provider_uid;
-      }
-    }
+    this.getListGroups();
   },
   methods: {
-    getListFriends: function getListFriends(id) {
+    getListGroups: function getListGroups() {
       var _this = this;
 
       this.loading = true;
-      Vue.http.get(route('facebook.friends.getList', id)).then(function (response) {
-        if (response.status == 200) {
-          _this.friends = response.body;
-        } else {
-          Vue.notify({
-            group: 'app',
-            type: 'error',
-            text: 'Không lấy được danh sách.'
-          });
-        }
-
+      Vue.http.get(route('facebook.groups.list')).then(function (response) {
+        _this.groups = response.body;
         _this.loading = false;
       });
     }
@@ -150,99 +138,132 @@ var render = function() {
                 "app-card",
                 {
                   attrs: {
-                    heading: _vm.$t("message.infoToGetListFriends"),
+                    fullBlock: true,
                     colClasses: "xl12 lg12 md12 sm12 xs12"
                   }
                 },
                 [
                   _c(
-                    "v-layout",
-                    { attrs: { row: "", wrap: "" } },
+                    "v-card-title",
                     [
-                      _c(
-                        "v-flex",
-                        { attrs: { xs6: "", sm2: "" } },
-                        [
-                          _c("v-text-field", {
-                            attrs: {
-                              name: "uid",
-                              label: "ID Facebook",
-                              disabled: _vm.getWithType === "me"
-                            },
-                            model: {
-                              value: _vm.provider_uid,
-                              callback: function($$v) {
-                                _vm.provider_uid = $$v
-                              },
-                              expression: "provider_uid"
-                            }
-                          })
-                        ],
-                        1
-                      ),
+                      _c("v-spacer"),
                       _vm._v(" "),
-                      _c(
-                        "v-flex",
-                        { attrs: { xs4: "", sm2: "" } },
-                        [
-                          _c("v-select", {
-                            attrs: {
-                              "hide-details": "",
-                              items: _vm.types,
-                              "item-text": "text",
-                              "item-value": "name",
-                              label: "Select",
-                              "single-line": "",
-                              "menu-props": "bottom"
-                            },
-                            model: {
-                              value: _vm.getWithType,
-                              callback: function($$v) {
-                                _vm.getWithType = $$v
-                              },
-                              expression: "getWithType"
-                            }
-                          })
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "v-flex",
-                        { attrs: { xs2: "", sm2: "" } },
-                        [
-                          _c(
-                            "v-btn",
-                            {
-                              staticClass: "gradient-success",
-                              attrs: {
-                                loading: _vm.loading,
-                                disabled: _vm.loading
-                              },
-                              nativeOn: {
-                                click: function($event) {
-                                  return _vm.getListFriends(_vm.provider_uid)
-                                }
-                              }
-                            },
-                            [_vm._v("\n\t\t\t\t\t\t\tLấy\n\t\t\t\t\t\t")]
-                          )
-                        ],
-                        1
-                      )
+                      _c("v-text-field", {
+                        attrs: {
+                          "append-icon": "search",
+                          label: "Search",
+                          "single-line": "",
+                          "hide-details": ""
+                        },
+                        model: {
+                          value: _vm.search,
+                          callback: function($$v) {
+                            _vm.search = $$v
+                          },
+                          expression: "search"
+                        }
+                      })
                     ],
                     1
-                  )
+                  ),
+                  _vm._v(" "),
+                  _c("v-data-table", {
+                    staticClass: "elevation-1",
+                    attrs: {
+                      "select-all": "",
+                      headers: _vm.headers,
+                      items: _vm.groups,
+                      loading: _vm.loading,
+                      search: _vm.search
+                    },
+                    scopedSlots: _vm._u([
+                      {
+                        key: "items",
+                        fn: function(props) {
+                          return [
+                            _c(
+                              "td",
+                              [
+                                _c("v-checkbox", {
+                                  attrs: { primary: "", "hide-details": "" },
+                                  model: {
+                                    value: props.selected,
+                                    callback: function($$v) {
+                                      _vm.$set(props, "selected", $$v)
+                                    },
+                                    expression: "props.selected"
+                                  }
+                                })
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c("td", [_vm._v(_vm._s(props.item.name))]),
+                            _vm._v(" "),
+                            _c("td", [_vm._v(_vm._s(props.item.member_count))]),
+                            _vm._v(" "),
+                            _c("td", [_vm._v(_vm._s(props.item.privacy))]),
+                            _vm._v(" "),
+                            _c("td", [
+                              _vm._v(_vm._s(props.item.administrator))
+                            ]),
+                            _vm._v(" "),
+                            _c(
+                              "td",
+                              { staticClass: "justify-center" },
+                              [
+                                _c(
+                                  "v-btn",
+                                  {
+                                    attrs: {
+                                      small: "",
+                                      color: "info",
+                                      target: "_blank",
+                                      href: "https://fb.com/" + props.item.id
+                                    }
+                                  },
+                                  [_vm._v("Link\r\n\t\t\t\t\t\t\t")]
+                                )
+                              ],
+                              1
+                            )
+                          ]
+                        }
+                      },
+                      {
+                        key: "pageText",
+                        fn: function(ref) {
+                          var pageStart = ref.pageStart
+                          var pageStop = ref.pageStop
+                          var itemsLength = ref.itemsLength
+                          return [
+                            _vm._v(
+                              "\r\n\t\t\t\t\t\tĐang xem " +
+                                _vm._s(pageStart) +
+                                " - " +
+                                _vm._s(pageStop) +
+                                " trong " +
+                                _vm._s(itemsLength) +
+                                " nhóm\r\n\t\t\t\t\t"
+                            )
+                          ]
+                        }
+                      }
+                    ]),
+                    model: {
+                      value: _vm.selected,
+                      callback: function($$v) {
+                        _vm.selected = $$v
+                      },
+                      expression: "selected"
+                    }
+                  })
                 ],
                 1
               )
             ],
             1
-          ),
-          _vm._v(" "),
-          _vm.friends != null
-            ? _c("cards-user-profile", { attrs: { friends: _vm.friends } })
-            : _vm._e()
+          )
         ],
         1
       )

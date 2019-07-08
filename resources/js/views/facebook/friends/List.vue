@@ -59,7 +59,7 @@
 		        :heading="$t('message.friendsList')"
 		        :fullBlock="true"
 		        colClasses="xl12 lg12 md12 sm12 d-xs-full">
-		        <v-card-title>Filter
+		        <v-card-title>
 		          <v-spacer></v-spacer>
 		          <v-text-field
 		            append-icon="search"
@@ -94,8 +94,8 @@
 		              </v-btn>
 		            </td>
 		    			</template>
-		          <template slot="pageText" slot-scope="{ pageStart, pageStop }">
-		            Từ {{ pageStart }} tới {{ pageStop }} bạn
+		          <template slot="pageText" slot-scope="{ pageStart, pageStop, itemsLength }">
+		            Đang xem {{ pageStart }} - {{ pageStop }} trong {{ itemsLength }} bạn
 		          </template>
 		        </v-data-table>
 		      </app-card>

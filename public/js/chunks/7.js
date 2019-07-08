@@ -423,7 +423,6 @@ var render = function() {
                         _c(
                           "v-card-title",
                           [
-                            _vm._v("Filter\n\t\t          "),
                             _c("v-spacer"),
                             _vm._v(" "),
                             _c("v-text-field", {
@@ -565,12 +564,15 @@ var render = function() {
                                 fn: function(ref) {
                                   var pageStart = ref.pageStart
                                   var pageStop = ref.pageStop
+                                  var itemsLength = ref.itemsLength
                                   return [
                                     _vm._v(
-                                      "\n\t\t            Từ " +
+                                      "\n\t\t            Đang xem " +
                                         _vm._s(pageStart) +
-                                        " tới " +
+                                        " - " +
                                         _vm._s(pageStop) +
+                                        " trong " +
+                                        _vm._s(itemsLength) +
                                         " bạn\n\t\t          "
                                     )
                                   ]
@@ -579,7 +581,7 @@ var render = function() {
                             ],
                             null,
                             false,
-                            1425671742
+                            1410290435
                           )
                         })
                       ],

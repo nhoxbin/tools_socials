@@ -63,6 +63,11 @@ Route::group([
             Route::get('/inbox-kount', 'MessengerController@kount')->name('inbox-kount');
             Route::match(['GET', 'POST'], '/inboxes', 'MessengerController@inboxes')->name('inboxes');
         });
+
+        Route::group(['as' => 'groups.', 'prefix' => 'groups'], function() {
+            Route::get('/list', 'GroupsController@getList')->name('list');
+            Route::post('/out', 'GroupsController@outGroup')->name('out');
+        });
     });
 });
 

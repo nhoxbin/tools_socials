@@ -2,13 +2,11 @@
 export const menus = {
 	'message.general': [{
 		action: 'zmdi-view-dashboard',
+		path: '/dashboard',
 		title: 'message.dashboard',
 		active: false,
-		items: [{
-			title: 'message.ecommerce',
-			path: '/dashboard',
-			exact: true,
-		}]
+		exact: true,
+		items: null
 	}],
 	'message.facebook': [{
 		action: 'zmdi-account',
@@ -39,7 +37,7 @@ export const menus = {
 			path: '/messenger/inboxes'
 		}]
 	}, {
-		action: 'zmdi-comments',
+		action: 'zmdi-accounts-list',
 		title: 'message.group',
 		active: false,
 		items: [{

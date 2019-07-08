@@ -12,7 +12,7 @@ const InboxKount = () =>
 	import ('Views/facebook/messenger/Ranking');
 const InboxEveryOne = () =>
 	import ('Views/facebook/messenger/Inboxes');
-const ListGroup = () =>
+const ListGroups = () =>
 	import ('Views/facebook/groups/List');
 const PostGroup = () =>
 	import ('Views/facebook/groups/Post');
@@ -110,8 +110,8 @@ export default {
 			}]
 		}
 	}, {
-		path: '/facebook/group/list',
-		component: ListGroup,
+		path: '/facebook/groups/list',
+		component: ListGroups,
 		meta: {
 			auth: true,
 			requiresFacebookAccount: true,

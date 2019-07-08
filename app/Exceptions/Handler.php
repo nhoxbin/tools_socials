@@ -53,12 +53,6 @@ class Handler extends ExceptionHandler
             $error_code = 404;
         }
 
-        if ($e instanceof MethodNotAllowHttpException) {
-            dd($e->getMethod());
-            $message = ['error' => 'This Route is not Support method!'];
-            $error_code = 405;
-        }
-
         if ($e instanceof QueryException) {
             $message = ['error' => 'QueryException Error!'];
             $error_code = 404;

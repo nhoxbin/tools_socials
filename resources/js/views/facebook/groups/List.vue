@@ -1,102 +1,85 @@
 <template>
-	<div>
-	  <page-title-bar></page-title-bar>
+<div>
+	<page-title-bar></page-title-bar>
 
-		<v-container grid-list-xl fluid py-0>
-			<v-layout row wrap>
-				<app-card
-					:heading="$t('message.infoToGetListFriends')"
-					colClasses="xl12 lg12 md12 sm12 xs12">
-					<v-layout row wrap>
-						<v-flex xs6 sm2>
-							<v-text-field
-								name="uid"
-								label="ID Facebook"
-								:disabled="getWithType === 'me'"
-								v-model.lazy="provider_uid">
-							</v-text-field>
-						</v-flex>
-						<v-flex xs4 sm2>
-							<v-select
-								hide-details
-								:items="types"
-								item-text="text"
-								item-value="name"
-								v-model="getWithType"
-								label="Select"
-								single-line
-								menu-props="bottom">
-							</v-select>
-						</v-flex>
-						<v-flex xs2 sm2>
-							<v-btn class="gradient-success"
-								@click.native="getListFriends(provider_uid)"
-								:loading="loading"
-								:disabled="loading">
-								Lấy
+	<v-container grid-list-xl fluid py-0>
+		<v-layout row wrap>
+			<app-card
+				:fullBlock="true"
+				colClasses="xl12 lg12 md12 sm12 xs12">
+				<v-card-title>
+					<v-spacer></v-spacer>
+					<v-text-field
+						append-icon="search"
+						label="Search"
+						single-line
+						hide-details
+						v-model="search">
+					</v-text-field>
+				</v-card-title>
+				<v-data-table
+					select-all
+					class="elevation-1"
+					v-model="selected"
+					:headers="headers"
+					:items="groups"
+					:loading="loading"
+					:search="search">
+					<template v-slot:items="props">
+						<td>
+							<v-checkbox primary hide-details
+								v-model="props.selected">
+							</v-checkbox>
+						</td>
+						<td>{{ props.item.name }}</td>
+						<td>{{ props.item.member_count }}</td>
+						<td>{{ props.item.privacy }}</td>
+						<td>{{ props.item.administrator }}</td>
+						<td class="justify-center">
+							<v-btn small color="info"
+								target="_blank"
+								:href="'https://fb.com/'+props.item.id">Link
 							</v-btn>
-						</v-flex>
-					</v-layout>
-				</app-card>
-			</v-layout>
-			
-			<cards-user-profile v-if="friends != null"
-				:friends="friends">
-			</cards-user-profile>
-		</v-container>
-	</div>
+						</td>
+					</template>
+					<template slot="pageText" slot-scope="{ pageStart, pageStop, itemsLength }">
+						Đang xem {{ pageStart }} - {{ pageStop }} trong {{ itemsLength }} nhóm
+					</template>
+				</v-data-table>
+			</app-card>
+		</v-layout>
+	</v-container>
+</div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
-// import UserProfile from "Components/UserProfile"
-
 export default {
-	components: {
-		
-	},
 	data: function() {
 		return {
+			search: null,
 			loading: false,
-			provider_uid: '',
-			friends: null,
-			getWithType: 'me',
-			types: [
-		        { text: "ID của tôi", name: 'me' },
-		        { text: "ID tùy chọn", name: 'custom' }
+			selected: [],
+			groups: [],
+			headers: [
+				{ text: 'Tên', value: 'name' },
+				{ text: 'Số lượng thành viên', value: 'member_count' },
+				{ text: 'Riêng tư', value: 'privacy' },
+				{ text: 'Quyền hạn', value: 'administrator' },
+				{ text: 'Hành động', value: 'actions', sortable: false }
 			]
 		}
 	},
-	computed: {
-		...mapGetters({account: 'facebookAccount'})
-	},
 	mounted() {
-		this.provider_uid = this.account.provider_uid;
-	},
-	watch: {
-		getWithType(value) {
-			if (value === 'me') {
-				this.provider_uid = this.account.provider_uid;
-			}
-		}
+		this.getListGroups();
 	},
 	methods: {
-		getListFriends(id) {
+		getListGroups() {
 			this.loading = true;
-			Vue.http.get(route('facebook.friends.getList', id))
+			Vue.http.get(route('facebook.groups.list'))
 				.then((response) => {
-					if (response.status == 200) {
-						this.friends = response.body;
-					} else {
-						Vue.notify({
-							group: 'app',
-							type: 'error',
-							text: 'Không lấy được danh sách.'
-						});
-					}
+					this.groups = response.body;
 					this.loading = false;
 				});
 		}
 	}
 }
-	
 </script>

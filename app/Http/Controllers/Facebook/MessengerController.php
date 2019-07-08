@@ -12,19 +12,11 @@ use Curl, Validator;
 class MessengerController extends Controller
 {
     protected $data_message = [];
-	protected $user_agent;
-
-	public function __construct() {
-		$this->user_agent = agent();
-	}
 
 	private function rank($url, array $rank) {
 		$conversations = json_decode(Curl::to($url)->get(), true);
 		if (isset($conversations['error'])) {
 			return false;
-		}
-		if (!isset($conversations['paging']['next'])) {
-			return $rank;
 		}
 		$conversations_data = $conversations['data'];
 		foreach ($conversations_data as $item) {
@@ -33,14 +25,17 @@ class MessengerController extends Controller
 				array_push($rank, $item);
 			}
 		}
+		if (!isset($conversations['paging']['next'])) {
+			return $rank;
+		}
 		return $this->rank($conversations['paging']['next'], $rank);
 	}
 
 	public function kount() {
 		$account = Account::where('user_id', auth()->id())->first();
-		$url = mkurl(true, 'graph.facebook.com', "v2.9/$account[provider_uid]/conversations", [
-			'fields' => 'id,message_count,link,participants',
-			'limit' => 50,
+		$url = mkurl(true, 'graph.facebook.com', "$account[provider_uid]/conversations", [
+			'fields' => 'message_count,link,participants',
+			'limit' => '5000',
 			'access_token' => $account['access_token']
 		]);
 		$rank = $this->rank($url, []);
@@ -91,7 +86,7 @@ class MessengerController extends Controller
 				$get_fb_dtsg = Curl::to($url)
 					->withHeaders([
 						'cookie: '.$user->cookie,
-						'user-agent: '.$this->user_agent
+						'user-agent: '.agent()
 					])->get();
 
 				$user->fb_dtsg = null;
@@ -133,7 +128,7 @@ class MessengerController extends Controller
 				$rq_send = Curl::to($url_send)
 					->withHeaders([
 			        	'Cookie: ' . $user->cookie,
-						'user-agent: ' . $this->user_agent,
+						'user-agent: ' . agent(),
 			        	'Cache-Control: no-cache'
 			        ])
 					->withData([

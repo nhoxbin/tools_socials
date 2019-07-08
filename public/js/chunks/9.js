@@ -1,14 +1,19 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([[9],{
 
-/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/views/facebook/messenger/Ranking.vue?vue&type=script&lang=js&":
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=script&lang=js&":
 /*!********************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/views/facebook/messenger/Ranking.vue?vue&type=script&lang=js& ***!
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=script&lang=js& ***!
   \********************************************************************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 //
 //
 //
@@ -50,57 +55,69 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      loader: true,
-      headers: [{
-        text: 'Hạng',
-        value: 'rank'
+      getWithType: 'me',
+      provider_uid: '',
+      time: [10, 25],
+      items: [{
+        text: "ID của tôi",
+        name: 'me'
       }, {
-        text: 'Tên',
-        value: 'name',
-        sortable: false
-      }, {
-        text: 'Tin nhắn',
-        value: 'message_count'
-      }, {
-        text: 'Hành động',
-        value: 'actions',
-        sortable: false
-      }],
-      kount: null
+        text: "ID tùy chọn",
+        name: 'custom'
+      }]
     };
   },
+  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])({
+    account: 'facebookAccount'
+  })),
   mounted: function mounted() {
-    var _this = this;
-
-    Vue.http.get(route('facebook.messenger.inbox-kount')).then(function (response) {
-      if (response.status == 204) {
-        Vue.notify({
-          group: 'app',
-          type: 'error',
-          text: 'Lỗi ko lấy được tin nhắn.'
-        });
-        return;
-      } else {
-        return response.json();
+    this.provider_uid = JSON.parse(this.account).provider_uid;
+  },
+  watch: {
+    getWithType: function getWithType(value) {
+      if (value === 'me') {// this.myId();
       }
-    }).then(function (data) {
-      if (data != undefined) {
-        _this.kount = data;
-      }
-
-      _this.loader = false;
-    });
-  }
+    }
+  },
+  methods: {}
 });
 
 /***/ }),
 
-/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/views/facebook/messenger/Ranking.vue?vue&type=template&id=3a3f25d0&":
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=template&id=1d0a104e&":
 /*!************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/views/facebook/messenger/Ranking.vue?vue&type=template&id=3a3f25d0& ***!
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=template&id=1d0a104e& ***!
   \************************************************************************************************************************************************************************************************************************/
 /*! exports provided: render, staticRenderFns */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -118,109 +135,160 @@ var render = function() {
     [
       _c("page-title-bar"),
       _vm._v(" "),
-      _c("app-section-loader", { attrs: { status: _vm.loader } }),
-      _vm._v(" "),
-      _vm.kount !== null
-        ? _c(
-            "v-container",
-            { attrs: { "grid-list-xl": "", fluid: "", "py-0": "" } },
+      _c(
+        "v-container",
+        { attrs: { "grid-list-xl": "", fluid: "", "pt-0": "" } },
+        [
+          _c(
+            "app-card",
+            {
+              attrs: {
+                heading: _vm.$t("message.getListFriendsWithID"),
+                contentCustomClass: "input-label"
+              }
+            },
             [
               _c(
                 "v-layout",
                 { attrs: { row: "", wrap: "" } },
                 [
                   _c(
-                    "app-card",
-                    {
-                      attrs: {
-                        heading: _vm.$t("message.standard"),
-                        fullBlock: true,
-                        colClasses: "xl12 lg12 md12 sm12 xs12"
-                      }
-                    },
+                    "v-flex",
+                    { attrs: { xs6: "", sm2: "" } },
                     [
-                      _c("div", { staticClass: "pa-3" }, [
-                        _c("p", { staticClass: "mb-0" }, [
-                          _vm._v("Xếp hạng "),
-                          _c("code", [_vm._v("2579")]),
-                          _vm._v(" tin nhắn")
-                        ])
-                      ]),
-                      _vm._v(" "),
-                      _c("v-data-table", {
+                      _c("v-text-field", {
                         attrs: {
-                          headers: _vm.headers,
-                          items: _vm.kount,
-                          "hide-actions": ""
+                          name: "uid",
+                          label: "ID Facebook",
+                          disabled: _vm.getWithType === "me"
                         },
-                        scopedSlots: _vm._u(
-                          [
-                            {
-                              key: "items",
-                              fn: function(props) {
-                                return [
-                                  _c("td", [_vm._v(_vm._s("1"))]),
-                                  _vm._v(" "),
-                                  _c("td", [
-                                    _vm._v(
-                                      _vm._s(props.item.participants[0].name)
-                                    )
-                                  ]),
-                                  _vm._v(" "),
-                                  _c("td", [
-                                    _vm._v(_vm._s(props.item.message_count))
-                                  ]),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    [
-                                      _c(
-                                        "v-btn",
-                                        {
-                                          attrs: {
-                                            color: "primary",
-                                            href:
-                                              "https://www.facebook.com/" +
-                                              props.item.link,
-                                            target: "_blank"
-                                          }
-                                        },
-                                        [
-                                          _vm._v(
-                                            "\n\t\t\t\t\t\t\t\tInbox\n\t\t\t\t\t\t\t"
-                                          )
-                                        ]
-                                      ),
-                                      _vm._v(" "),
-                                      _c(
-                                        "v-btn",
-                                        {
-                                          attrs: {
-                                            color: "accent",
-                                            href:
-                                              "https://www.facebook.com/" +
-                                              props.item.participants[0].id,
-                                            target: "_blank"
-                                          }
-                                        },
-                                        [
-                                          _vm._v(
-                                            "\n\t\t\t\t\t\t\t\tHistory\n\t\t\t\t\t\t\t"
-                                          )
-                                        ]
-                                      )
-                                    ],
-                                    1
-                                  )
-                                ]
-                              }
-                            }
-                          ],
-                          null,
-                          false,
-                          701549671
-                        )
+                        model: {
+                          value: _vm.provider_uid,
+                          callback: function($$v) {
+                            _vm.provider_uid = $$v
+                          },
+                          expression: "provider_uid"
+                        }
                       })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-flex",
+                    { attrs: { xs4: "", sm2: "" } },
+                    [
+                      _c("v-select", {
+                        attrs: {
+                          "hide-details": "",
+                          items: _vm.items,
+                          "item-text": "text",
+                          "item-value": "name",
+                          label: "Select",
+                          "single-line": "",
+                          "menu-props": "bottom"
+                        },
+                        model: {
+                          value: _vm.getWithType,
+                          callback: function($$v) {
+                            _vm.getWithType = $$v
+                          },
+                          expression: "getWithType"
+                        }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-flex",
+                    { attrs: { xs2: "", sm2: "" } },
+                    [
+                      _c("v-btn", { attrs: { color: "primary", raised: "" } }, [
+                        _vm._v("Lấy")
+                      ])
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-flex",
+                    { attrs: { xs4: "", sm4: "" } },
+                    [
+                      _c("v-range-slider", {
+                        attrs: {
+                          "hide-details": "",
+                          "thumb-size": "",
+                          max: 42,
+                          min: 6,
+                          step: 3
+                        },
+                        model: {
+                          value: _vm.time,
+                          callback: function($$v) {
+                            _vm.time = $$v
+                          },
+                          expression: "time"
+                        }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-flex",
+                    { attrs: { xs4: "", sm2: "" } },
+                    [
+                      _c("v-card-text", [
+                        _vm._v(
+                          "\n\t\t\t\t\t\t" +
+                            _vm._s(_vm.time[0]) +
+                            " ~ " +
+                            _vm._s(_vm.time[1]) +
+                            " Giây\n\t\t\t\t\t"
+                        )
+                      ])
+                    ],
+                    1
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "v-layout",
+                { attrs: { row: "", wrap: "" } },
+                [
+                  _c(
+                    "v-flex",
+                    { attrs: { xs6: "", sm3: "" } },
+                    [
+                      _c(
+                        "v-card",
+                        {
+                          staticClass: "theme--dark",
+                          attrs: { color: "primary" }
+                        },
+                        [_c("v-card-text", [_vm._v("3")])],
+                        1
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-flex",
+                    { attrs: { xs6: "", sm3: "" } },
+                    [
+                      _c(
+                        "v-card",
+                        {
+                          staticClass: "theme--dark",
+                          attrs: { color: "primary" }
+                        },
+                        [_c("v-card-text", [_vm._v("1")])],
+                        1
+                      )
                     ],
                     1
                   )
@@ -230,7 +298,9 @@ var render = function() {
             ],
             1
           )
-        : _vm._e()
+        ],
+        1
+      )
     ],
     1
   )
@@ -242,17 +312,17 @@ render._withStripped = true
 
 /***/ }),
 
-/***/ "./resources/js/views/facebook/messenger/Ranking.vue":
+/***/ "./resources/js/views/facebook/messenger/Inboxes.vue":
 /*!***********************************************************!*\
-  !*** ./resources/js/views/facebook/messenger/Ranking.vue ***!
+  !*** ./resources/js/views/facebook/messenger/Inboxes.vue ***!
   \***********************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _Ranking_vue_vue_type_template_id_3a3f25d0___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Ranking.vue?vue&type=template&id=3a3f25d0& */ "./resources/js/views/facebook/messenger/Ranking.vue?vue&type=template&id=3a3f25d0&");
-/* harmony import */ var _Ranking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Ranking.vue?vue&type=script&lang=js& */ "./resources/js/views/facebook/messenger/Ranking.vue?vue&type=script&lang=js&");
+/* harmony import */ var _Inboxes_vue_vue_type_template_id_1d0a104e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Inboxes.vue?vue&type=template&id=1d0a104e& */ "./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=template&id=1d0a104e&");
+/* harmony import */ var _Inboxes_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Inboxes.vue?vue&type=script&lang=js& */ "./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=script&lang=js&");
 /* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
@@ -262,9 +332,9 @@ __webpack_require__.r(__webpack_exports__);
 /* normalize component */
 
 var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
-  _Ranking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
-  _Ranking_vue_vue_type_template_id_3a3f25d0___WEBPACK_IMPORTED_MODULE_0__["render"],
-  _Ranking_vue_vue_type_template_id_3a3f25d0___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  _Inboxes_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Inboxes_vue_vue_type_template_id_1d0a104e___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _Inboxes_vue_vue_type_template_id_1d0a104e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
   false,
   null,
   null,
@@ -274,38 +344,38 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 
 /* hot reload */
 if (false) { var api; }
-component.options.__file = "resources/js/views/facebook/messenger/Ranking.vue"
+component.options.__file = "resources/js/views/facebook/messenger/Inboxes.vue"
 /* harmony default export */ __webpack_exports__["default"] = (component.exports);
 
 /***/ }),
 
-/***/ "./resources/js/views/facebook/messenger/Ranking.vue?vue&type=script&lang=js&":
+/***/ "./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=script&lang=js&":
 /*!************************************************************************************!*\
-  !*** ./resources/js/views/facebook/messenger/Ranking.vue?vue&type=script&lang=js& ***!
+  !*** ./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=script&lang=js& ***!
   \************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Ranking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/babel-loader/lib??ref--4-0!../../../../../node_modules/vue-loader/lib??vue-loader-options!./Ranking.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/views/facebook/messenger/Ranking.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Ranking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Inboxes_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/babel-loader/lib??ref--4-0!../../../../../node_modules/vue-loader/lib??vue-loader-options!./Inboxes.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Inboxes_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
 
 /***/ }),
 
-/***/ "./resources/js/views/facebook/messenger/Ranking.vue?vue&type=template&id=3a3f25d0&":
+/***/ "./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=template&id=1d0a104e&":
 /*!******************************************************************************************!*\
-  !*** ./resources/js/views/facebook/messenger/Ranking.vue?vue&type=template&id=3a3f25d0& ***!
+  !*** ./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=template&id=1d0a104e& ***!
   \******************************************************************************************/
 /*! exports provided: render, staticRenderFns */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Ranking_vue_vue_type_template_id_3a3f25d0___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../../node_modules/vue-loader/lib??vue-loader-options!./Ranking.vue?vue&type=template&id=3a3f25d0& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/views/facebook/messenger/Ranking.vue?vue&type=template&id=3a3f25d0&");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Ranking_vue_vue_type_template_id_3a3f25d0___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Inboxes_vue_vue_type_template_id_1d0a104e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../../node_modules/vue-loader/lib??vue-loader-options!./Inboxes.vue?vue&type=template&id=1d0a104e& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/views/facebook/messenger/Inboxes.vue?vue&type=template&id=1d0a104e&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Inboxes_vue_vue_type_template_id_1d0a104e___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Ranking_vue_vue_type_template_id_3a3f25d0___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Inboxes_vue_vue_type_template_id_1d0a104e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
