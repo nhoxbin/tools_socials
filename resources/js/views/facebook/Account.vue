@@ -1,59 +1,56 @@
 <template>
-	<div>
-		<page-title-bar></page-title-bar>
-		<app-section-loader :status="loader"></app-section-loader>
+<div>
+	<page-title-bar></page-title-bar>
+	<app-section-loader :status="loader"></app-section-loader>
 
-		<div v-if="loader == false">
-			<v-container fluid grid-list-xl py-0>
-				<app-card v-if="!has_account || account.is_active == 0"
-					:heading="$t('message.infoToLoginFB')"
-					customClasses="mb-30"
-					>
-					<v-form v-model="account_form.valid" ref="form" lazy-validation>
-						<v-text-field
-							label="Username"
-							v-model="account_form.username"
-							:rules="account_form.usernameRules"
-						></v-text-field>
-						<v-text-field
-							label="Password"
-							v-model="account_form.password"
-							:rules="account_form.passwordRules"
-							type="password"
-						></v-text-field>
-						<v-btn
-							@click="submit"
-							color="success"
-						>
-							{{$t("message.login")}}
-						</v-btn>
-						<v-btn @click="clear" color="primary">{{$t("message.clear")}}</v-btn>
-					</v-form>
-				</app-card>
-
-		        <app-card
-			        v-if="has_account"
-			        :heading="$t('message.yourInfoAccountFB')"
-			        :fullBlock="true"
-			        colClasses="xl12 lg12 md12 sm12 xs12">
-		            <div class="pa-3">
-		                <p class="mb-0">ID Facebook, Tên và trạng thái hoạt động của bạn</p>
-		            </div>
-		            <v-data-table :headers="headers" :items="[account]" hide-actions>
-		                <template slot="items" slot-scope="props">
-		                    <td>{{ props.item.name }}</td>
-		                    <td>{{ props.item.provider_uid }}</td>
-		                    <td>{{ props.item.is_active === 1 ? 'true':'false' }}</td>
-		                    <td>{{ props.item.status || 'Hoạt động' }}</td>
-		                </template>
-		            </v-data-table>
-		            <v-btn @click="updateAccountFacebook" color="primary">
-		                Cập nhật tài khoản Facebook
-		            </v-btn>
-		        </app-card>
-			</v-container>
-		</div>
+	<div v-if="loader == false">
+		<v-container fluid grid-list-xl py-0>
+			<app-card v-if="status"
+				:heading="$t('message.infoToLoginFB')"
+				customClasses="mb-30">
+				<v-form v-model="account_form.valid" ref="form" lazy-validation>
+					<v-text-field
+						label="Username"
+						v-model="account_form.username"
+						:rules="account_form.usernameRules">
+          </v-text-field>
+					<v-text-field
+						label="Password"
+						v-model="account_form.password"
+						:rules="account_form.passwordRules"
+						type="password">
+          </v-text-field>
+					<v-btn
+						@click="submit"
+						color="success">
+						{{ $t("message.login") }}
+					</v-btn>
+					<v-btn @click="clear" color="primary">{{$t("message.clear")}}</v-btn>
+				</v-form>
+			</app-card>
+      <app-card
+        v-if="has_account"
+        :heading="$t('message.yourInfoAccountFB')"
+        :fullBlock="true"
+        colClasses="xl12 lg12 md12 sm12 xs12">
+          <div class="pa-3">
+              <p class="mb-0">ID Facebook, Tên và trạng thái hoạt động của bạn</p>
+          </div>
+          <v-data-table :headers="headers" :items="account" hide-actions>
+              <template slot="items" slot-scope="props">
+                  <td>{{ props.item.name }}</td>
+                  <td>{{ props.item.provider_uid }}</td>
+                  <td>{{ props.item.is_active === 1 ? 'true':'false' }}</td>
+                  <td>{{ props.item.status || 'Hoạt động' }}</td>
+              </template>
+          </v-data-table>
+          <v-btn @click="updateAccountFacebook" color="primary">
+              Cập nhật tài khoản Facebook
+          </v-btn>
+      </app-card>
+		</v-container>
 	</div>
+</div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
@@ -82,10 +79,15 @@ export default {
 		}
 	},
 	computed: {
-		...mapGetters({
-			has_account: 'checkFacebookAccount',
-			account: 'facebookAccount'
-		})
+    account() {
+      return this.$auth.user().facebook;
+    },
+    has_account() {
+      return !_.isEmpty(this.$auth.user().facebook);
+    },
+    status() {
+      return _.isEmpty(this.$auth.user().facebook) ? true : ((this.$auth.user().role.name !== 'Member') ? true : false);
+    }
 	},
 	methods: {
 		submit() {
@@ -103,20 +105,36 @@ export default {
 				password: this.account_form.password
 			}
 			
-			this.$store.dispatch('loginFacebook', account).then(() => {
-				this.loader = false;
-			});
+			Vue.http.post(route('facebook.login'), account)
+        .then((response) => {
+          Vue.notify({
+            group: 'app',
+            type: 'success',
+            text: response.body
+          });
+        }, (error) => {
+          Vue.notify({
+            group: 'app',
+            type: 'error',
+            text: error.body
+          });
+        }).then(() => {
+          this.loader = false;
+        });
 		},
 		updateAccountFacebook: function() {
 			Vue.http.post(route('facebook.account.update'))
 				.then((response) => {
 					Vue.notify({
-						group: 'loggedIn',
+						group: 'app',
 						type: 'success',
 						text: response.body
 					});
-					this.$store.dispatch('getFacebookAccount');
 				});
+      Vue.http.get(route('facebook.account.show'))
+        .then(response => {
+          this.$auth.user().facebook = response.body;
+        });
 		}
 	}
 }

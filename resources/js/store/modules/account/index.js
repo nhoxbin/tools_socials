@@ -1,5 +1,6 @@
 const state = {
-	account: JSON.parse(localStorage.getItem('FacebookAccount'))
+	account: localStorage.getItem('FacebookAccount') !== '' ?
+		JSON.parse(localStorage.getItem('FacebookAccount')) : null
 }
 
 const getters = {

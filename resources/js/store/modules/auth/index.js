@@ -7,7 +7,7 @@ import Nprogress from 'nprogress';
 import router from '../../../router';
 
 const state = {
-	authToken: localStorage.getItem('AuthToken')
+	authToken: localStorage.getItem('AuthToken') || null
 }
 
 // getters

@@ -10,13 +10,6 @@
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-//
-//
-//
 //
 //
 //
@@ -107,10 +100,17 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }]
     };
   },
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])({
-    has_account: 'checkFacebookAccount',
-    account: 'facebookAccount'
-  })),
+  computed: {
+    account: function account() {
+      return this.$auth.user().facebook;
+    },
+    has_account: function has_account() {
+      return !_.isEmpty(this.$auth.user().facebook);
+    },
+    status: function status() {
+      return _.isEmpty(this.$auth.user().facebook) ? true : this.$auth.user().role.name !== 'Member' ? true : false;
+    }
+  },
   methods: {
     submit: function submit() {
       if (this.$refs.form.validate()) {
@@ -128,7 +128,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         username: this.account_form.username,
         password: this.account_form.password
       };
-      this.$store.dispatch('loginFacebook', account).then(function () {
+      Vue.http.post(route('facebook.login'), account).then(function (response) {
+        Vue.notify({
+          group: 'app',
+          type: 'success',
+          text: response.body
+        });
+      }, function (error) {
+        Vue.notify({
+          group: 'app',
+          type: 'error',
+          text: error.body
+        });
+      }).then(function () {
         _this.loader = false;
       });
     },
@@ -137,12 +149,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       Vue.http.post(route('facebook.account.update')).then(function (response) {
         Vue.notify({
-          group: 'loggedIn',
+          group: 'app',
           type: 'success',
           text: response.body
         });
-
-        _this2.$store.dispatch('getFacebookAccount');
+      });
+      Vue.http.get(route('facebook.account.show')).then(function (response) {
+        _this2.$auth.user().facebook = response.body;
       });
     }
   }
@@ -180,7 +193,7 @@ var render = function() {
                 "v-container",
                 { attrs: { fluid: "", "grid-list-xl": "", "py-0": "" } },
                 [
-                  !_vm.has_account || _vm.account.is_active == 0
+                  _vm.status
                     ? _c(
                         "app-card",
                         {
@@ -241,9 +254,9 @@ var render = function() {
                                 },
                                 [
                                   _vm._v(
-                                    "\n\t\t\t\t\t\t" +
+                                    "\r\n\t\t\t\t\t\t" +
                                       _vm._s(_vm.$t("message.login")) +
-                                      "\n\t\t\t\t\t"
+                                      "\r\n\t\t\t\t\t"
                                   )
                                 ]
                               ),
@@ -286,7 +299,7 @@ var render = function() {
                           _c("v-data-table", {
                             attrs: {
                               headers: _vm.headers,
-                              items: [_vm.account],
+                              items: _vm.account,
                               "hide-actions": ""
                             },
                             scopedSlots: _vm._u(
@@ -338,7 +351,7 @@ var render = function() {
                             },
                             [
                               _vm._v(
-                                "\n\t                Cập nhật tài khoản Facebook\n\t            "
+                                "\r\n              Cập nhật tài khoản Facebook\r\n          "
                               )
                             ]
                           )

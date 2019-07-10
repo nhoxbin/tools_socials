@@ -26,12 +26,12 @@ Route::group(['prefix' => 'auth'], function() {
         Route::get('refresh', 'AuthController@refresh');
         // this /user path is used to fetchData on client side (vue-auth)
         Route::get('user', 'AuthController@user');
+        Route::post('logout', 'AuthController@logout');
+
+        // Route::get('user/{id}', 'UserController@show')->middleware('isAdminOrSelf');
         Route::resource('users', 'UserController')
             ->parameters(['users' => 'id'])
             ->middleware('isAdmin'); // change users param (users/{user}) to users/{id}
-
-        // Route::get('user/{id}', 'UserController@show')->middleware('isAdminOrSelf');
-        Route::post('logout', 'AuthController@logout');
     });
 });
 
@@ -43,13 +43,13 @@ Route::group([
 ], function() {
 
     Route::post('login', 'AccountController@login')
-        ->middleware('checkLoginFB')
+        ->middleware('memberCannotLoginFBTwice')
         ->name('login');
 
     Route::get('account', 'AccountController@show')->name('account.show');
     Route::post('/account/update', 'AccountController@update')->name('account.update');
 
-    Route::group(['middleware' => 'hasLoginFB'], function() {
+    Route::group(['middleware' => 'hasAccountFB'], function() {
         Route::group(['as' => 'feed.', 'prefix' => 'feed'], function() {
             Route::post('reactions', 'FeedController@reactions')->name('reactions');
         });
@@ -66,7 +66,12 @@ Route::group([
 
         Route::group(['as' => 'groups.', 'prefix' => 'groups'], function() {
             Route::get('/list', 'GroupsController@getList')->name('list');
-            Route::post('/out', 'GroupsController@outGroup')->name('out');
+            Route::post('/out', 'GroupsController@out')->name('out');
+        });
+
+        Route::group(['as' => 'auto.', 'prefix' => 'auto'], function() {
+            Route::post('/like', 'GroupsController@outGroup')->name('like');
+            Route::post('/comment', 'HomeController@autoComment')->name('comment');
         });
     });
 });

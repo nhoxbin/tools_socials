@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Facebook;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Account;
+use App\User;
 use Curl;
 
 class AccountController extends Controller
@@ -15,30 +16,32 @@ class AccountController extends Controller
     }
 
     public function show() {
-        $user_id = auth()->id();
-        $account = Account::where('user_id', $user_id)
-            ->select('provider_uid', 'name', 'is_active', 'status')
+        $account = Account::where('user_id', auth()->id())
+            ->select('id', 'provider_uid', 'name', 'is_active', 'status', 'user_id')
             ->first();
             
         return response($account, 200);
     }
 
     public function update() {
-        $account = Account::where('user_id', auth()->id())->select('id', 'provider_uid', 'access_token', 'is_active')->first();
+        $accounts = User::find(auth()->id())->facebook;
+        foreach ($accounts as $account) {
+            // get name and id of user
+            $url = mkurl(true, 'graph.facebook.com', "v3.3/$account[provider_uid]", [
+                'access_token' => $account->access_token
+            ]);
+            $userInfo = json_decode(Curl::to($url)->get(), true);
 
-        // get name and id of user
-        $url_userInfo = mkurl(true, 'graph.facebook.com', "v3.3/$account[provider_uid]", ['access_token' => $account->access_token]);
-        $userInfo = json_decode(Curl::to($url_userInfo)->get(), true);
-
-        if (!isset($userInfo['id']) || !isset($userInfo['name'])) {
-            $account->is_active = 0;
-            $account->status = 'Không lấy được thông tin tài khoản. Vui lòng đăng nhập lại!';
-            $account->access_token = null;
-            $account->cookie = null;
-        } else {
-            $account->name = $userInfo['name'];
+            if (!isset($userInfo['id']) || !isset($userInfo['name'])) {
+                $account->is_active = 0;
+                $account->status = 'Không lấy được thông tin tài khoản. Vui lòng đăng nhập lại!';
+                $account->access_token = null;
+                $account->cookie = null;
+            } else {
+                $account->name = $userInfo['name'];
+            }
+            $account->save();
         }
-        $account->save();
 
         return response('Cập nhật thành công!', 200);
     }

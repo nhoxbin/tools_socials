@@ -25,21 +25,25 @@ class AuthController extends Controller
         $user = User::create($input);
 
         $message = 'Lỗi khi đăng kí!';
+        $code = 422;  // unprocessable entity
         // if create user success then create a token from $input
         if ($user->wasRecentlyCreated) {
             $message = 'Đăng kí thành công.';
             $code = 201; // created
         }
-        return response($message, $code==201 ? $code : 422); // unprocessable entity
+        return response($message, $code);
     }
 
-    public function logout(Request $request) {
+    public function logout() {
         auth()->invalidate();
         return response('Logged out Successfully.', 200);
     }
 
-    public function user(Request $request) {
-    	$user = User::find(auth()->id());
+    public function user() {
+        $user = User::with('role', 'facebook:id,name,provider_uid,status,is_active,user_id')
+            ->where('id', auth()->id())
+            ->select('id', 'username', 'email', 'role_id')
+            ->first();
         return response($user, 200);
     }
 

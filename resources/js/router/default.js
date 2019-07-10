@@ -16,6 +16,8 @@ const ListGroups = () =>
 	import ('Views/facebook/groups/List');
 const PostGroup = () =>
 	import ('Views/facebook/groups/Post');
+const AutoComment = () =>
+	import ('Views/facebook/auto/Comment');
 
 export default {
 	path: '/',
@@ -133,6 +135,19 @@ export default {
 				breadcrumbInactive: 'Facebook / Group /'
 			}, {
 				breadcrumbActive: 'List'
+			}]
+		}
+	}, {
+		path: '/facebook/auto/comment',
+		component: AutoComment,
+		meta: {
+			auth: true,
+			requiresFacebookAccount: true,
+			title: 'message.autoComment',
+			breadcrumb: [{
+				breadcrumbInactive: 'Facebook / Auto /'
+			}, {
+				breadcrumbActive: 'Comment'
 			}]
 		}
 	}]

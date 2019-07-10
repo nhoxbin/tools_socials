@@ -47,5 +47,13 @@ export const menus = {
 			title: 'message.post',
 			path: '/groups/post'
 		}]
+	}, {
+		action: 'zmdi-flash-auto',
+		title: 'message.auto',
+		active: false,
+		items: [{
+			title: 'message.comment',
+			path: '/auto/comment'
+		}]
 	}]
 }
