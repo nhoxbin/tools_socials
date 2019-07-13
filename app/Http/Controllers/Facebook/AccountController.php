@@ -4,21 +4,21 @@ namespace App\Http\Controllers\Facebook;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Account;
+use App\FBAccount;
 use App\User;
 use Curl;
 
 class AccountController extends Controller
 {
     public function index() {
-        $accounts = Account::all();
+        $accounts = FBAccount::all();
         return response($accounts, 200);
     }
 
     public function show() {
-        $account = Account::where('user_id', auth()->id())
+        $account = FBAccount::where('user_id', auth()->id())
             ->select('id', 'provider_uid', 'name', 'is_active', 'status', 'user_id')
-            ->first();
+            ->get();
             
         return response($account, 200);
     }
@@ -61,7 +61,7 @@ class AccountController extends Controller
         $access_token = $data_user['access_token'];
         $cookie = convert_cookie($data_user['session_cookies']);
         
-        $account = Account::where('provider_uid', $p_uid)->first();
+        $account = FBAccount::where('provider_uid', $p_uid)->first();
         // cả user và account đều có trên hệ thống
         if ($account !== null) {
             // user_id trên hệ thống khác user_id vừa đăng nhập account
@@ -74,7 +74,7 @@ class AccountController extends Controller
         // Curl get name
         $url = mkurl(true, 'graph.facebook.com', "v3.3/$p_uid", ['access_token' => $access_token]);
         $user = json_decode(Curl::to($url)->get(), true);
-        $info = Account::updateOrCreate([
+        $info = FBAccount::updateOrCreate([
             'user_id' => $user_id,
             'provider_uid' => $p_uid
         ], [

@@ -71,7 +71,7 @@ Route::group([
 
         Route::group(['as' => 'auto.', 'prefix' => 'auto'], function() {
             Route::post('/like', 'GroupsController@outGroup')->name('like');
-            Route::post('/comment', 'HomeController@autoComment')->name('comment');
+            Route::post('/comment', 'HomeController@startComment')->name('comment');
         });
     });
 });

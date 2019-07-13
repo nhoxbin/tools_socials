@@ -96,8 +96,6 @@ export default {
 		this.$store.dispatch("signIn", {
 			user,
 			auth: this.$auth
-		}).then(() => {
-			this.$store.dispatch('getFacebookAccount');
 		});
     },
     signInWithFacebook() {

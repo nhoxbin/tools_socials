@@ -41,14 +41,13 @@ function HandleLogin($array) {
 	if (!isset($array['error_data'])) {
 		return false;
 	}
-	// has error
 	$code = $array['error_code'];
 	$data = json_decode($array['error_data'], true);
-
 	$message;
 	switch ($code) {
-		case 400: case 401:
-			// #401 "Invalid username or password"
+		case 400: case 401: case 405:
+			#401 "Invalid username or password"
+			#405 "Checkpoint"
 			$message = $data['error_message'];
 			break;
 		default:

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Social;
-use App\Account;
+use App\FBAccount;
 use Curl;
 
 class FriendsController extends Controller
@@ -38,7 +38,7 @@ class FriendsController extends Controller
 	}
 
 	public function getList(Request $request, $p_uid) {
-		$account = Account::where('user_id', Auth::id())->first();
+		$account = FBAccount::where('user_id', Auth::id())->first();
 
 		$friends = $this->getFriendsWithId($p_uid, $account->access_token);
 		if ($friends === 'error') {
@@ -48,7 +48,7 @@ class FriendsController extends Controller
 	}
 
 	public function unfriend(Request $request, $uid) {
-		$account = Account::where('user_id', auth()->id())->first();
+		$account = FBAccount::where('user_id', auth()->id())->first();
 		$access_token = $account->access_token;
 
 		$url = mkurl(true, 'graph.facebook.com', "$account[provider_uid]/friends", [

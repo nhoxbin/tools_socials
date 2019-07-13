@@ -7,8 +7,10 @@ import Vuetify from 'vuetify'
 import VueFullscreen from 'vue-fullscreen'
 import VueBreadcrumbs from 'vue2-breadcrumbs'
 import Notifications from 'vue-notification'
+import DatePicker from 'vue2-datepicker'
 import velocity from 'velocity-animate'
 import Nprogress from 'nprogress'
+import VueAuth from '@websanova/vue-auth'
 import VueI18n from 'vue-i18n'
 import {
 	AUTH_CONFIG
@@ -41,7 +43,7 @@ import './lib/VuelyCss'
 router.beforeEach((to, from, next) => {
 	Nprogress.start()
 	if (to.matched.some(record => record.meta.requiresFacebookAccount)) {
-		if (localStorage.getItem('FacebookAccount') === null) {
+		if (store.getters.facebookAccount === null) {
 			next({
 				path: '/facebook/account',
 				query: {
@@ -65,7 +67,7 @@ router.afterEach((from, next) => {
 /* @websanova extension for using json web token auth */
 // Vue.router and Vue.http is important
 Vue.router = router;
-Vue.use(require('@websanova/vue-auth'), AUTH_CONFIG);
+Vue.use(VueAuth, AUTH_CONFIG);
 // ./@websanova
 
 Vue.use(Vuetify, {
@@ -77,6 +79,7 @@ Vue.use(Notifications, {
 })
 Vue.use(VueBreadcrumbs)
 Vue.use(VueFullscreen)
+Vue.use(DatePicker)
 Vue.use(GlobalComponents)
 
 /**

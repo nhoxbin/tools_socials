@@ -39,7 +39,7 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     public function facebook() {
-        return $this->hasMany('App\Account');
+        return $this->hasMany('App\FBAccount');
     }
 
     public function role() {

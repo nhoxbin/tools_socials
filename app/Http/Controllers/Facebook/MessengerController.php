@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Facebook\FriendsController as Friends;
-use App\Account;
+use App\FBAccount;
 use Curl, Validator;
 
 class MessengerController extends Controller
@@ -32,7 +32,7 @@ class MessengerController extends Controller
 	}
 
 	public function kount() {
-		$account = Account::where('user_id', auth()->id())->first();
+		$account = FBAccount::where('user_id', auth()->id())->first();
 		$url = mkurl(true, 'graph.facebook.com', "$account[provider_uid]/conversations", [
 			'fields' => 'message_count,link,participants',
 			'limit' => '5000',

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Facebook;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Account;
+use App\FBAccount;
 use Curl;
 use Session;
 
@@ -61,7 +61,7 @@ class FeedController extends Controller
 
 	public function reactions(Request $request) {
 		if ($request->selectDateType >= 1 && $request->selectDateType <= 2) {
-			$account = Account::where('user_id', auth()->id())->first();
+			$account = FBAccount::where('user_id', auth()->id())->first();
 			$since = $request->selectDateType == 1 ? '-3 months' : '-6 months';
 			$url = mkurl(true, 'graph.facebook.com', 'v3.3/me/feed', [
 				'fields' => 'reactions{name,pic_small,link,type}',

@@ -179,8 +179,6 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     submit: function submit() {
-      var _this = this;
-
       var user = {
         email: this.email,
         password: this.password,
@@ -189,8 +187,6 @@ __webpack_require__.r(__webpack_exports__);
       this.$store.dispatch("signIn", {
         user: user,
         auth: this.$auth
-      }).then(function () {
-        _this.$store.dispatch('getFacebookAccount');
       });
     },
     signInWithFacebook: function signInWithFacebook() {

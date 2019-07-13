@@ -49,30 +49,28 @@ const actions = {
 		});
 	},
 	signIn(context, payload) {
-		return new Promise(async(resolve, reject) => {
-			const {
-				user,
-				auth
-			} = payload;
+		const {
+			user,
+			auth
+		} = payload;
 
-			Nprogress.start();
-			await auth.login({
-				body: JSON.stringify(user),
-				success: function(response) {
-					context.commit('authNotify', {
-						type: 'success',
-						message: response.body
-					});
-					resolve();
-				},
-				error: function(error) {
-					context.commit('authNotify', {
-						type: 'error',
-						message: error.body
-					});
-				}
-			});
-		})
+		Nprogress.start();
+		auth.login({
+			body: JSON.stringify(user),
+			success: function(response) {
+				context.dispatch('getAccountFB');
+				context.commit('authNotify', {
+					type: 'success',
+					message: response.body
+				});
+			},
+			error: function(error) {
+				context.commit('authNotify', {
+					type: 'error',
+					message: error.body
+				});
+			}
+		});
 	},
 	logoutUser(context, auth) {
 		return new Promise(async(resolve, reject) => {

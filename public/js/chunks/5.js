@@ -64,11 +64,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       loader: false,
+      loading: false,
       account_form: {
         valid: true,
         username: "",
@@ -108,7 +112,19 @@ __webpack_require__.r(__webpack_exports__);
       return !_.isEmpty(this.$auth.user().facebook);
     },
     status: function status() {
-      return _.isEmpty(this.$auth.user().facebook) ? true : this.$auth.user().role.name !== 'Member' ? true : false;
+      if (_.isEmpty(this.$auth.user().facebook)) {
+        return true;
+      } else {
+        if (this.$auth.user().role.name !== 'Member') {
+          return true;
+        } else {
+          if (this.$auth.user().facebook[0].is_active === 0) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
     }
   },
   methods: {
@@ -129,6 +145,10 @@ __webpack_require__.r(__webpack_exports__);
         password: this.account_form.password
       };
       Vue.http.post(route('facebook.login'), account).then(function (response) {
+        Vue.http.get(route('facebook.account.show')).then(function (resp) {
+          localStorage.setItem('FacebookAccount', JSON.stringify(resp.body));
+          _this.$auth.user().facebook = resp.body;
+        });
         Vue.notify({
           group: 'app',
           type: 'success',
@@ -147,6 +167,7 @@ __webpack_require__.r(__webpack_exports__);
     updateAccountFacebook: function updateAccountFacebook() {
       var _this2 = this;
 
+      this.loading = true;
       Vue.http.post(route('facebook.account.update')).then(function (response) {
         Vue.notify({
           group: 'app',
@@ -156,6 +177,7 @@ __webpack_require__.r(__webpack_exports__);
       });
       Vue.http.get(route('facebook.account.show')).then(function (response) {
         _this2.$auth.user().facebook = response.body;
+        _this2.loading = false;
       });
     }
   }
@@ -254,9 +276,9 @@ var render = function() {
                                 },
                                 [
                                   _vm._v(
-                                    "\r\n\t\t\t\t\t\t" +
+                                    "\r\n            " +
                                       _vm._s(_vm.$t("message.login")) +
-                                      "\r\n\t\t\t\t\t"
+                                      "\r\n          "
                                   )
                                 ]
                               ),
@@ -346,7 +368,11 @@ var render = function() {
                           _c(
                             "v-btn",
                             {
-                              attrs: { color: "primary" },
+                              attrs: {
+                                disabled: _vm.loading,
+                                loading: _vm.loading,
+                                color: "primary"
+                              },
                               on: { click: _vm.updateAccountFacebook }
                             },
                             [

@@ -13,28 +13,10 @@ const getters = {
 }
 
 const actions = {
-	loginFacebook(context, FacebookAccount) {
-		return new Promise(async(resolve, reject) => {
-			await Vue.http.post(route('facebook.login'), FacebookAccount).then(async(response) => {
-				// login facebook success
-				await context.dispatch('getFacebookAccount');
-				context.commit('accountNotify', {
-					type: 'success',
-					message: response.body
-				});
-			}).catch(function(response) {
-				context.commit('accountNotify', {
-					type: 'error',
-					message: response.body
-				});
-			});
-			resolve();
-		})
-	},
-	getFacebookAccount(context) {
+	getAccountFB(context) {
 		Vue.http.get(route('facebook.account.show'))
 			.then((response) => {
-				if (response.status == 200) {
+				if (response.body.length > 0) {
 					context.commit('storeAccount', response.body);
 				} else {
 					context.commit('accountNotify', {
@@ -62,7 +44,7 @@ const mutations = {
 		localStorage.setItem('FacebookAccount', JSON.stringify(account));
 	},
 	deleteAccount(state) {
-		state.FacebookAccount = null;
+		state.account = null;
 		localStorage.removeItem('FacebookAccount');
 	}
 }

@@ -1,33 +1,33 @@
 <template>
 <div>
-	<page-title-bar></page-title-bar>
-	<app-section-loader :status="loader"></app-section-loader>
+  <page-title-bar></page-title-bar>
+  <app-section-loader :status="loader"></app-section-loader>
 
-	<div v-if="loader == false">
-		<v-container fluid grid-list-xl py-0>
-			<app-card v-if="status"
-				:heading="$t('message.infoToLoginFB')"
-				customClasses="mb-30">
-				<v-form v-model="account_form.valid" ref="form" lazy-validation>
-					<v-text-field
-						label="Username"
-						v-model="account_form.username"
-						:rules="account_form.usernameRules">
+  <div v-if="loader == false">
+    <v-container fluid grid-list-xl py-0>
+      <app-card v-if="status"
+        :heading="$t('message.infoToLoginFB')"
+        customClasses="mb-30">
+        <v-form v-model="account_form.valid" ref="form" lazy-validation>
+          <v-text-field
+            label="Username"
+            v-model="account_form.username"
+            :rules="account_form.usernameRules">
           </v-text-field>
-					<v-text-field
-						label="Password"
-						v-model="account_form.password"
-						:rules="account_form.passwordRules"
-						type="password">
+          <v-text-field
+            label="Password"
+            v-model="account_form.password"
+            :rules="account_form.passwordRules"
+            type="password">
           </v-text-field>
-					<v-btn
-						@click="submit"
-						color="success">
-						{{ $t("message.login") }}
-					</v-btn>
-					<v-btn @click="clear" color="primary">{{$t("message.clear")}}</v-btn>
-				</v-form>
-			</app-card>
+          <v-btn
+            @click="submit"
+            color="success">
+            {{ $t("message.login") }}
+          </v-btn>
+          <v-btn @click="clear" color="primary">{{$t("message.clear")}}</v-btn>
+        </v-form>
+      </app-card>
       <app-card
         v-if="has_account"
         :heading="$t('message.yourInfoAccountFB')"
@@ -44,41 +44,45 @@
                   <td>{{ props.item.status || 'Hoạt động' }}</td>
               </template>
           </v-data-table>
-          <v-btn @click="updateAccountFacebook" color="primary">
+          <v-btn @click="updateAccountFacebook"
+            :disabled="loading"
+            :loading="loading"
+            color="primary">
               Cập nhật tài khoản Facebook
           </v-btn>
       </app-card>
-		</v-container>
-	</div>
+    </v-container>
+  </div>
 </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
 
 export default {
-	data: function() {
-		return {
-			loader: false,
-			account_form: {
-				valid: true,
-				username: "",
-				usernameRules: [
-					v => !!v || "Name is required"
-				],
-				password: "",
-				passwordRules: [
-					v => !!v || "E-mail is required"
-				]
-			},
-			headers: [
-				{ text: "Tên", align: "left", sortable: false, value: "name" },
-				{ text: "ID Facebook", sortable: false, value: "provider_uid" },
-				{ text: "Hoạt động", sortable: false, value: "is_active" },
-				{ text: "Trạng thái", sortable: false, value: "status" }
-			]
-		}
-	},
-	computed: {
+  data: function() {
+    return {
+      loader: false,
+      loading: false,
+      account_form: {
+        valid: true,
+        username: "",
+        usernameRules: [
+          v => !!v || "Name is required"
+        ],
+        password: "",
+        passwordRules: [
+          v => !!v || "E-mail is required"
+        ]
+      },
+      headers: [
+        { text: "Tên", align: "left", sortable: false, value: "name" },
+        { text: "ID Facebook", sortable: false, value: "provider_uid" },
+        { text: "Hoạt động", sortable: false, value: "is_active" },
+        { text: "Trạng thái", sortable: false, value: "status" }
+      ]
+    }
+  },
+  computed: {
     account() {
       return this.$auth.user().facebook;
     },
@@ -86,27 +90,44 @@ export default {
       return !_.isEmpty(this.$auth.user().facebook);
     },
     status() {
-      return _.isEmpty(this.$auth.user().facebook) ? true : ((this.$auth.user().role.name !== 'Member') ? true : false);
+      if (_.isEmpty(this.$auth.user().facebook)) {
+        return true;
+      } else {
+        if (this.$auth.user().role.name !== 'Member') {
+          return true;
+        } else {
+          if (this.$auth.user().facebook[0].is_active === 0) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
     }
-	},
-	methods: {
-		submit() {
-			if (this.$refs.form.validate()) {
-				this.loader = true;
-				this.loginFacebook();
-			}
-		},
-		clear() {
-			this.$refs.form.reset();
-		},
-		loginFacebook: function() {
-			const account = {
-				username: this.account_form.username,
-				password: this.account_form.password
-			}
-			
-			Vue.http.post(route('facebook.login'), account)
+  },
+  methods: {
+    submit() {
+      if (this.$refs.form.validate()) {
+        this.loader = true;
+        this.loginFacebook();
+      }
+    },
+    clear() {
+      this.$refs.form.reset();
+    },
+    loginFacebook: function() {
+      const account = {
+        username: this.account_form.username,
+        password: this.account_form.password
+      }
+      
+      Vue.http.post(route('facebook.login'), account)
         .then((response) => {
+          Vue.http.get(route('facebook.account.show'))
+            .then(resp => {
+              localStorage.setItem('FacebookAccount', JSON.stringify(resp.body));
+              this.$auth.user().facebook = resp.body;
+            });
           Vue.notify({
             group: 'app',
             type: 'success',
@@ -121,21 +142,23 @@ export default {
         }).then(() => {
           this.loader = false;
         });
-		},
-		updateAccountFacebook: function() {
-			Vue.http.post(route('facebook.account.update'))
-				.then((response) => {
-					Vue.notify({
-						group: 'app',
-						type: 'success',
-						text: response.body
-					});
-				});
+    },
+    updateAccountFacebook: function() {
+      this.loading = true;
+      Vue.http.post(route('facebook.account.update'))
+        .then((response) => {
+          Vue.notify({
+            group: 'app',
+            type: 'success',
+            text: response.body
+          });
+        });
       Vue.http.get(route('facebook.account.show'))
         .then(response => {
           this.$auth.user().facebook = response.body;
+          this.loading = false;
         });
-		}
-	}
+    }
+  }
 }
 </script>

@@ -1,7 +1,7 @@
 <!-- App Main Structure -->
 <template>
 	<div class="app-default-layout">
-		<template v-if="!$auth.ready()">
+		<template v-if="!$auth.ready() || loading">
 			<rotate-square2></rotate-square2>
 		</template>
 		<template v-else>
@@ -26,6 +26,7 @@ import AppConfig from "Constants/AppConfig";
 export default {
   data() {
     return {
+    	loading: true
     };
   },
   components: {
@@ -35,6 +36,9 @@ export default {
     ...mapGetters(['selectedRouterAnimation'])
   },
   mounted() {
+  	setTimeout(() => {
+  		this.loading = false;
+  	}, 1e3);
   }
 };
 </script>
