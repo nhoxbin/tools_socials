@@ -176,6 +176,7 @@ __webpack_require__.r(__webpack_exports__);
         });
       });
       Vue.http.get(route('facebook.account.show')).then(function (response) {
+        localStorage.setItem('FacebookAccount', JSON.stringify(response.body));
         _this2.$auth.user().facebook = response.body;
         _this2.loading = false;
       });

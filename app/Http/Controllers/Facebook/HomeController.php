@@ -14,17 +14,16 @@ class HomeController extends Controller
         // lấy bài viết
     	$url = mkurl(true, 'graph.facebook.com', 'me/home', [
     		'fields' => 'from{name},created_time',
-    		'limit' => '300',
+    		'limit' => '250',
     		'access_token' => $account->access_token
     	]);
     	$posts = json_decode(Curl::to($url)->get(), true);
         if (isset($posts['error'])) {
             return false;
         }
-        // lấy ra id của bài viết để xem là page hay user
+        // lấy ra id của bài viết và CURL để xem là page hay user
         $posts_data = $posts['data'];
-        $uids = implode(',', array_column($posts_data, 'id'));
-        $uids = preg_replace('/_.+?,/m', ',', $uids);
+        $uids = preg_replace('/_.+?,/m', ',', implode(',', array_column($posts_data, 'id')));
 
         // lấy kiểu trả về của 1 id (user hoặc page)
         $url = mkurl(true, 'graph.facebook.com', '', [
@@ -55,24 +54,25 @@ class HomeController extends Controller
         $has_commented = FBComment::where('facebook_account_id', $account->id)->first();
         if ($has_commented !== null) {
             // quản lý comment
-            $posts_commented = explode('|', $has_commented->posts);
+            $posts_commented_id = explode('|', $has_commented->post_ids);
+            // lấy id bài viết từ $posts
             $posts_id = array_column($posts, 'id');
             // lặp qua các bài viết đã comment và xem nếu ko có trong bài viết vừa get thì loại bỏ
-            // id đó trong db và khi nào id đó ($posts_commented) ko tìm bài viết trong $posts thì mới xóa đi
-            foreach ($posts_commented as $key => $post_commented) {
-                if (!in_array($post_commented, $posts_id)) {
-                    unset($posts_commented[$key]);
+            // id đó trong db và khi nào id đó ($posts_commented_id) ko tìm thấy bài viết trong $posts thì mới xóa đi
+            foreach ($posts_commented_id as $key => $post_commented_id) {
+                if (!in_array($post_commented_id, $posts_id)) {
+                    unset($posts_commented_id[$key]);
                 }
             }
             // đếm tổng số lượng id bài viết trong db lớn hơn số lượng bài viết vừa qua vòng lặp ở trên
             // thì lưu lại số lượng bài viết vừa lọc vào db
-            if (count(explode('|', $has_commented->posts)) > count($posts_commented)) {
-                $has_commented->posts = implode('|', $posts_commented);
+            if (count(explode('|', $has_commented->post_ids)) > count($posts_commented_id)) {
+                $has_commented->post_ids = implode('|', $posts_commented_id);
                 $has_commented->save();
             }
 
             foreach ($posts as $key => $value) {
-                if (in_array($value['id'], $posts_commented)) {
+                if (in_array($value['id'], $posts_commented_id)) {
                     unset($posts[$key]);
                 }
             }
@@ -82,7 +82,7 @@ class HomeController extends Controller
         }
     }
 
-    public function comment($account, $id_post, $comment) {
+    private function comment($account, $id_post, $comment) {
         $url = mkurl(true, 'graph.facebook.com', "$id_post/comments", [
             'message' => $comment,
             'method' => 'post',
@@ -92,7 +92,33 @@ class HomeController extends Controller
         if (!empty($status_comment['error'])) {
             return false;
         }
-        return $status['id'];
+        $comment = FBComment::where('facebook_account_id', $account->id)->first();
+        if ($comment === null) {
+            $comment = new FBComment;
+            $comment->facebook_account_id = $account->id;
+            $comment->post_ids = $id_post . '|';
+            $comment->comment_ids = $status_comment['id'] . '|';
+            $comment->save();
+        } else {
+            $comment->post_ids .= ($id_post . '|');
+            $comment->comment_ids .= ($status_comment['id'] . '|');
+            $comment->save();
+        }
+        return true;
+    }
+
+    private function deleteComment($account, $commented_id) {
+        $url = mkurl(true, 'graph.facebook.com', $commented_id, ['method' => 'delete']);
+        // dữ liệu trả về là true nếu xóa được
+        $is_success = Curl::to($url)->get();
+        if ($is_success !== 'true') {
+            return false;
+        }
+        $comment = FBComment::where('facebook_account_id', $account->id)->first();
+        $str = preg_replace("/$commented_id\|/m", '', $comment->post_ids);
+        $comment->post_ids = $str;
+        $comment->save();
+        return true;
     }
 
     public function startComment(Request $request) {
@@ -113,13 +139,21 @@ class HomeController extends Controller
             $account = $account[rand(0, count($account)-1)];
         }
 
+        if ($request->deleteComment === 'delete') {
+            $delete = $this->deleteComment($account, $request->commented_id);
+            if ($delete === false) {
+                return response('Lỗi khi xóa comment, comment ko tồn tại hoặc token lỗi!', 500);
+            }
+            return response('OK', 200);
+        }
+
         // lấy account facebook và ktra nếu có id post thì comment
         if (!empty($request->id_post)) {
             $is_success = $this->comment($account, $request->id_post, $request->comment);
             if ($is_success === false) {
-                return response('Không bình luận được, cập nhật lại tài khoản Facebook', 500);
+                return response('Không bình luận được', 500);
             } else {
-                return response('Đã bình luận.', 200);
+                return response('Đã bình luận', 200);
             }
         } else {
             $limitPosts = $request->limitPosts;

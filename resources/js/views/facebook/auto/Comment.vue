@@ -5,6 +5,22 @@
   <v-container fluid grid-list-xl pt-0>
     <v-layout row wrap>
       <app-card
+        heading="Một số lưu ý"
+        colClasses="md12 sm12 xs12">
+        <v-list>
+          <v-list-tile-title>
+          - Đây là phần mềm tự động nên khi ấn "Lấy bài viết" sẽ tự động lấy các bài viết ở newfeed
+          </v-list-tile-title>
+          <v-list-tile-title>
+            - Khi ấn "Bắt đầu comment" sẽ hiện ra nút "Dừng Auto". Phần mềm sẽ tự động chạy và comment vào những bài viết đã lấy được
+          </v-list-tile-title>
+          <v-list-tile-title>
+            - Khi ấn vào nút "Dừng Auto" phần mềm sẽ dừng tự động bình luận và trở lại trạng thái ban đầu để lấy bài viết
+          </v-list-tile-title>
+        </v-list>
+      </app-card>
+
+      <app-card
         heading="Chức năng"
         fullBlock="true"
         :withTabs="true"
@@ -42,24 +58,33 @@
             </v-card>
           </v-tab-item>
         </v-tabs-items>
-        <v-btn v-if="posts.length === 0"
-          color="info"
-          :loading="loading"
-          :disabled="loading"
-          @click="getPosts(selectedId)">Lấy bài viết
-        </v-btn>
-        <v-btn v-else
-          color="success"
-          :loading="loading"
-          :disabled="loading"
-          @click="startComment(uid, posts, comment)">Bắt đầu Comment
-        </v-btn>
-        <v-btn v-if="is_start"
-          color="success"
-          :loading="loading"
-          :disabled="loading"
-          @click="!is_start">Dừng Auto!
-        </v-btn>
+
+        <v-layout row wrap>
+          <v-flex md3 sm3 xs3>
+            <v-btn v-if="posts.length === 0"
+              color="info"
+              :loading="loading"
+              :disabled="loading"
+              @click="getPosts(selectedId)">Lấy bài viết
+            </v-btn>
+            <v-btn v-else
+              color="success"
+              :loading="loading"
+              :disabled="loading"
+              @click="startComment(selectedId, posts, comment)">Bắt đầu Comment
+            </v-btn>
+            <v-btn v-if="is_start"
+              color="warning"
+              @click="is_start = false">Dừng Auto!
+            </v-btn>
+          </v-flex>
+
+            <v-spacer></v-spacer>
+            
+          <v-flex md3 sm3 xs3>
+            <v-btn color="error">Xóa tất cả Comment</v-btn>
+          </v-flex>
+        </v-layout>
       </app-card>
     </v-layout>
   </v-container>
@@ -72,7 +97,7 @@ export default {
   data () {
     return {
       tab: 'auto-comment-home',
-      is_start: true,
+      is_start: false,
       items: ['home'],
       comment: '',
       loading: false,
@@ -123,30 +148,38 @@ export default {
         });
     },
     startComment(uid, posts, comment) {
-      sleep_loop(posts, [7, 15], (val, index) => {
+      this.is_start = true;
+      this.loading = true;
+      sleep_loop(posts, [5, 10], (val, index) => {
+        if (this.is_start === false) {
+          this.posts = [];
+          this.loading = false;
+          alert('Đã dừng Auto!');
+          return 'break';
+        }
         Vue.http.post(route('facebook.auto.comment'), {
           uid: uid,
-          id_post: val,
+          id_post: val.id,
           comment: comment
         }).then((response) => response.json())
-          .then((response) => {
-            console.log(response);
+          .then((status) => {
+            Vue.notify({
+              group: 'app',
+              type: 'error',
+              text: status + ' ' + val.from.name
+            });
           }, function(error) {
             Vue.notify({
               group: 'app',
               type: 'error',
-              text: error.body
+              text: error
             });
-          })
-          .then(() => {
-            if (this.is_start === false) {
-              return 'break';
-            }
+            this.is_start = false;
           });
       });
     },
-    stopComment() {
-
+    deleteAllComment() {
+      // sleep_loop()
     }
   }
 }

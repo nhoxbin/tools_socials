@@ -15,8 +15,8 @@ class CreateFacebookCommentsTable extends Migration
     {
         Schema::create('facebook_comments', function (Blueprint $table) {
             $table->increments('id');
-            $table->longText('posts');
-            $table->longText('commented_id');
+            $table->longText('post_ids');
+            $table->longText('comment_ids');
             $table->unsignedBigInteger('facebook_account_id');
             $table->foreign('facebook_account_id')->references('id')->on('facebook_accounts')->onDelete('cascade');
             $table->timestamps();

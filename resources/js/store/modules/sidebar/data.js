@@ -2,7 +2,7 @@
 export const menus = {
 	'message.general': [{
 		action: 'zmdi-view-dashboard',
-		path: '/dashboard',
+		path: '/facebook/dashboard',
 		title: 'message.dashboard',
 		active: false,
 		exact: true,
@@ -31,7 +31,7 @@ export const menus = {
 		active: false,
 		items: [{
 			title: 'message.rank',
-			path: '/messenger/kount'
+			path: '/facebook/messenger/kount'
 		}, {
 			title: 'message.inbox',
 			path: '/messenger/inboxes'

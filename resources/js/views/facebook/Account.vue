@@ -155,6 +155,7 @@ export default {
         });
       Vue.http.get(route('facebook.account.show'))
         .then(response => {
+          localStorage.setItem('FacebookAccount', JSON.stringify(response.body));
           this.$auth.user().facebook = response.body;
           this.loading = false;
         });
