@@ -61,7 +61,6 @@ Route::group([
 
         Route::group(['as' => 'messenger.', 'prefix' => 'messenger'], function() {
             Route::get('/inbox-kount', 'MessengerController@kount')->name('inbox-kount');
-            Route::match(['GET', 'POST'], '/inboxes', 'MessengerController@inboxes')->name('inboxes');
         });
 
         Route::group(['as' => 'groups.', 'prefix' => 'groups'], function() {
@@ -70,8 +69,12 @@ Route::group([
         });
 
         Route::group(['as' => 'auto.', 'prefix' => 'auto'], function() {
-            Route::post('/like', 'GroupsController@outGroup')->name('like');
+            // inbox
+            Route::match(['GET', 'POST'], '/inbox', 'MessengerController@inbox')->name('inbox');
+            // comment
             Route::post('/comment', 'HomeController@startComment')->name('comment');
+            // xóa comment
+            Route::match(['GET', 'POST'], '/comment/delete/{uid}', 'HomeController@deleteComment')->where('uid', '[0-9]+')->name('delete-comment');
         });
     });
 });
