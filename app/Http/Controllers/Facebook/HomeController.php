@@ -22,8 +22,8 @@ class HomeController extends Controller
 
     private function getPosts($account, $limitCommentPosts) {
         // lấy bài viết
-    	$url = mkurl(true, 'graph.facebook.com', 'me/home', [
-    		'fields' => 'from{name}',
+    	$url = mkurl(true, 'graph.facebook.com', 'v3.3/me/home', [
+    		'fields' => 'from',
     		'limit' => 200,
     		'access_token' => $account->access_token
     	]);
@@ -31,7 +31,7 @@ class HomeController extends Controller
         if (isset($posts['error'])) {
             return false;
         }
-        // lấy ra id của bài viết và CURL để xem là page hay user
+        // lấy ra id của người đăng bài và CURL để xem là page hay user
         $posts_data = $posts['data'];
         $str_ids = preg_replace('/_.+?,/m', ',', implode(',', array_column($posts_data, 'id')));
 
@@ -127,17 +127,17 @@ class HomeController extends Controller
         if ($request->isMethod('GET')) {
             return response(explode('|', substr($comment->comment_ids, 0, -1)), 200);
         } else {
-            $url = mkurl(true, 'graph.facebook.com', $request->commented_id, [
+            $commented_id = $request->commented_id;
+            $url = mkurl(true, 'graph.facebook.com', $commented_id, [
                 'method' => 'delete',
                 'access_token' => $this->account->access_token
             ]);
             // dữ liệu trả về là true nếu xóa được
             $is_success = Curl::to($url)->get();
-            if ($is_success !== true) {
+            if ($is_success !== 'true') {
                 return response('Có lỗi khi xóa bình luận!', 500);
             }
-            $str = preg_replace("/$commented_id\|/m", '', $comment->comment_ids);
-            $comment->comment_ids = $str;
+            $comment->comment_ids = preg_replace("/$commented_id\|/m", '', $comment->comment_ids);
             $comment->save();
             return response('Đã xóa bình luận', 200);
         }
@@ -165,7 +165,7 @@ class HomeController extends Controller
             if (trim($request->comment) === '') {
                 return response('Vui lòng nhập nội dung muốn bình luận!', 422);
             }
-            $is_success = $this->comment($this->account, $request->id_post, $request->picture, $request->comment);
+            $is_success = $this->comment($this->account, $request->id_post, $request->url_picture, $request->comment);
             if ($is_success === false) {
                 return response('Không bình luận được', 500);
             } else {

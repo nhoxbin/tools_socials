@@ -93,7 +93,7 @@ export function sleep_loop(val, time, callback) {
 			} else if (action === 'continue') {
 				i += 2;
 			} else {
-				if (i < val.length) {
+				if (i < val.length - 1) {
 					i++;
 				} else {
 					return;

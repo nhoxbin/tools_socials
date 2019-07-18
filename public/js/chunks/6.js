@@ -129,6 +129,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -140,7 +149,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       loading: false,
       posts: [],
       limitPosts: 50,
-      postHasCommented: []
+      postHasCommented: [],
+      url_picture: ''
     };
   },
   computed: {
@@ -194,38 +204,87 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         _this.loading = false;
       });
     },
-    startComment: function startComment(uid, posts, comment) {
-      var _this2 = this;
+    startComment: function () {
+      var _startComment = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(uid, posts, comment, url_picture) {
+        var _this2 = this;
 
-      this.is_start = true;
-      this.loading = true;
-      Object(Helpers_helpers__WEBPACK_IMPORTED_MODULE_1__["sleep_loop"])(posts, [5, 10], function (val, index) {
-        if (_this2.is_start === false) {
-          _this2.posts = [];
-          _this2.loading = false;
-          alert('Đã dừng Auto!');
-          return 'break';
-        }
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                this.is_start = true;
+                this.loading = true;
+                _context2.next = 4;
+                return Object(Helpers_helpers__WEBPACK_IMPORTED_MODULE_1__["sleep_loop"])(posts, [5, 10],
+                /*#__PURE__*/
+                function () {
+                  var _ref = _asyncToGenerator(
+                  /*#__PURE__*/
+                  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(val, index) {
+                    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+                      while (1) {
+                        switch (_context.prev = _context.next) {
+                          case 0:
+                            if (!(_this2.is_start === false)) {
+                              _context.next = 5;
+                              break;
+                            }
 
-        Vue.http.post(route('facebook.auto.comment'), {
-          uid: uid,
-          id_post: val.id,
-          comment: comment
-        }).then(function (status) {
-          Vue.notify({
-            group: 'app',
-            type: 'success',
-            text: status.body + ' vào bài viết của ' + val.from.name
-          });
-        }, function (error) {
-          Vue.notify({
-            group: 'app',
-            type: 'error',
-            text: error.body
-          });
-        });
-      });
-    },
+                            _this2.posts = [];
+                            _this2.loading = false;
+                            alert('Đã dừng Auto!');
+                            return _context.abrupt("return", 'break');
+
+                          case 5:
+                            _context.next = 7;
+                            return Vue.http.post(route('facebook.auto.comment'), {
+                              uid: uid,
+                              id_post: val.id,
+                              comment: comment,
+                              url_picture: url_picture
+                            }).then(function (status) {
+                              Vue.notify({
+                                group: 'app',
+                                type: 'success',
+                                text: status.body + ' vào bài viết của ' + val.from.name
+                              });
+                            }, function (error) {
+                              Vue.notify({
+                                group: 'app',
+                                type: 'error',
+                                text: error.body
+                              });
+                            });
+
+                          case 7:
+                          case "end":
+                            return _context.stop();
+                        }
+                      }
+                    }, _callee);
+                  }));
+
+                  return function (_x5, _x6) {
+                    return _ref.apply(this, arguments);
+                  };
+                }());
+
+              case 4:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function startComment(_x, _x2, _x3, _x4) {
+        return _startComment.apply(this, arguments);
+      }
+
+      return startComment;
+    }(),
     getPostHasCommented: function getPostHasCommented(uid) {
       var _this3 = this;
 
@@ -243,26 +302,26 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     deleteComment: function () {
       var _deleteComment = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(uid, postHasCommented) {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4(uid, postHasCommented) {
         var _this4 = this;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
                 this.loading = true;
-                _context2.next = 3;
+                _context4.next = 3;
                 return Object(Helpers_helpers__WEBPACK_IMPORTED_MODULE_1__["sleep_loop"])(postHasCommented, 2,
                 /*#__PURE__*/
                 function () {
-                  var _ref = _asyncToGenerator(
+                  var _ref2 = _asyncToGenerator(
                   /*#__PURE__*/
-                  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(val, index) {
-                    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+                  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3(val, index) {
+                    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
                       while (1) {
-                        switch (_context.prev = _context.next) {
+                        switch (_context3.prev = _context3.next) {
                           case 0:
-                            _context.next = 2;
+                            _context3.next = 2;
                             return Vue.http.post(route('facebook.auto.delete-comment', {
                               uid: uid
                             }), {
@@ -289,26 +348,26 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                           case 3:
                           case "end":
-                            return _context.stop();
+                            return _context3.stop();
                         }
                       }
-                    }, _callee);
+                    }, _callee3);
                   }));
 
-                  return function (_x3, _x4) {
-                    return _ref.apply(this, arguments);
+                  return function (_x9, _x10) {
+                    return _ref2.apply(this, arguments);
                   };
                 }());
 
               case 3:
               case "end":
-                return _context2.stop();
+                return _context4.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee4, this);
       }));
 
-      function deleteComment(_x, _x2) {
+      function deleteComment(_x7, _x8) {
         return _deleteComment.apply(this, arguments);
       }
 
@@ -534,28 +593,63 @@ var render = function() {
                                           })
                                         ],
                                         1
-                                      )
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "v-flex",
-                                    { attrs: { md12: "", sm12: "", xs12: "" } },
-                                    [
-                                      _c("v-textarea", {
-                                        attrs: {
-                                          outline: "",
-                                          label: "Nhập bình luận..."
+                                      ),
+                                      _vm._v(" "),
+                                      _c(
+                                        "v-flex",
+                                        {
+                                          attrs: {
+                                            md12: "",
+                                            sm12: "",
+                                            xs12: ""
+                                          }
                                         },
-                                        model: {
-                                          value: _vm.comment,
-                                          callback: function($$v) {
-                                            _vm.comment = $$v
-                                          },
-                                          expression: "comment"
-                                        }
-                                      })
+                                        [
+                                          _c("v-textarea", {
+                                            attrs: {
+                                              outline: "",
+                                              disabled: _vm.is_start,
+                                              label: "Nhập bình luận..."
+                                            },
+                                            model: {
+                                              value: _vm.comment,
+                                              callback: function($$v) {
+                                                _vm.comment = $$v
+                                              },
+                                              expression: "comment"
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      ),
+                                      _vm._v(" "),
+                                      _c(
+                                        "v-flex",
+                                        {
+                                          attrs: {
+                                            md12: "",
+                                            sm12: "",
+                                            xs12: ""
+                                          }
+                                        },
+                                        [
+                                          _c("v-text-field", {
+                                            attrs: {
+                                              outline: "",
+                                              disabled: _vm.is_start,
+                                              label: "URL hình ảnh..."
+                                            },
+                                            model: {
+                                              value: _vm.url_picture,
+                                              callback: function($$v) {
+                                                _vm.url_picture = $$v
+                                              },
+                                              expression: "url_picture"
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
                                     ],
                                     1
                                   )
@@ -578,7 +672,7 @@ var render = function() {
                     [
                       _c(
                         "v-flex",
-                        { attrs: { md3: "", sm3: "", xs3: "" } },
+                        { attrs: { md4: "", sm6: "", xs12: "" } },
                         [
                           _vm.posts.length === 0
                             ? _c(
@@ -613,7 +707,8 @@ var render = function() {
                                       return _vm.startComment(
                                         _vm.selectedId,
                                         _vm.posts,
-                                        _vm.comment
+                                        _vm.comment,
+                                        _vm.url_picture
                                       )
                                     }
                                   }
@@ -643,7 +738,7 @@ var render = function() {
                       _vm._v(" "),
                       _c(
                         "v-flex",
-                        { attrs: { md4: "", sm4: "", xs4: "" } },
+                        { attrs: { md4: "", sm6: "", xs12: "" } },
                         [
                           _vm.postHasCommented.length === 0
                             ? _c(

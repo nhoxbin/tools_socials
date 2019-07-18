@@ -60,17 +60,26 @@
                       v-model="selectedId"
                     ></v-select>
                   </v-flex>
-                </v-layout>
 	                <v-flex md12 sm12 xs12>
-	                  <v-textarea outline v-model.lazy="comment" label="Nhập bình luận..."></v-textarea>
+	                  <v-textarea outline
+                      v-model.lazy="comment"
+                      :disabled="is_start"
+                      label="Nhập bình luận..."></v-textarea>
 	                </v-flex>
+                  <v-flex md12 sm12 xs12>
+                    <v-text-field outline
+                      v-model.lazy="url_picture"
+                      :disabled="is_start"
+                      label="URL hình ảnh..."/>
+                  </v-flex>
+                </v-layout>
               </v-card-title>
             </v-card>
           </v-tab-item>
         </v-tabs-items>
 
         <v-layout row wrap>
-          <v-flex md3 sm3 xs3>
+          <v-flex md4 sm6 xs12>
             <v-btn v-if="posts.length === 0"
               color="info"
               :loading="loading"
@@ -81,7 +90,7 @@
               color="success"
               :loading="loading"
               :disabled="loading"
-              @click="startComment(selectedId, posts, comment)">Bắt đầu Comment
+              @click="startComment(selectedId, posts, comment, url_picture)">Bắt đầu Comment
             </v-btn>
             <v-btn v-if="is_start"
               color="warning"
@@ -91,7 +100,7 @@
 
             <v-spacer></v-spacer>
             
-          <v-flex md4 sm4 xs4>
+          <v-flex md4 sm6 xs12>
             <v-btn v-if="postHasCommented.length === 0"
               color="warning"
               :loading="loading"
@@ -122,7 +131,8 @@ export default {
       loading: false,
       posts: [],
       limitPosts: 50,
-      postHasCommented: []
+      postHasCommented: [],
+      url_picture: ''
     }
   },
   computed: {
@@ -168,20 +178,21 @@ export default {
           this.loading = false;
         });
     },
-    startComment(uid, posts, comment) {
+    async startComment(uid, posts, comment, url_picture) {
       this.is_start = true;
       this.loading = true;
-      sleep_loop(posts, [5, 10], (val, index) => {
+      await sleep_loop(posts, [5, 10], async(val, index) => {
         if (this.is_start === false) {
           this.posts = [];
           this.loading = false;
           alert('Đã dừng Auto!');
           return 'break';
         }
-        Vue.http.post(route('facebook.auto.comment'), {
+        await Vue.http.post(route('facebook.auto.comment'), {
           uid: uid,
           id_post: val.id,
-          comment: comment
+          comment: comment,
+          url_picture: url_picture
         }).then((status) => {
             Vue.notify({
               group: 'app',
