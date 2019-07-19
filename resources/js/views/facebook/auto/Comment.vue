@@ -29,43 +29,52 @@
         <v-tabs v-model="tab">
           <v-tab v-for="(item, index) in items"
             :key="index"
-            :href="`#auto-comment-${item}`">
-            {{ item }}
+            :href="`#auto-comment-${item.value}`">
+            {{ item.text }}
           </v-tab>
         </v-tabs>
         <v-tabs-items v-model="tab">
           <v-tab-item v-for="(item, index) in items"
             :key="index"
-            :value="`auto-comment-${item}`">
+            :value="`auto-comment-${item.value}`">
             <v-card flat>
               <v-card-title primary-title>
                 <v-layout row wrap>
-                  <v-flex md6 sm6 xs12>
-                    <span class="small pt-4 d-block">Nhập số lượng bài viết muốn comment</span>
-                  </v-flex>
-                  <v-flex md6 sm6 xs12>
-                    <v-text-field
-                      type="number"
-                      :disabled="posts.length > 0"
-                      v-model="limitPosts"
-                    ></v-text-field>
-                  </v-flex>
                   <v-flex md6 sm6 xs12>
                     <span class="small pt-4 d-block">Chọn tk muốn comment</span>
                   </v-flex>
                   <v-flex md6 sm6 xs12>
                     <v-select
                       :items="ids"
-                      :disabled="posts.length > 0"
+                      :disabled="data.length > 0"
                       v-model="selectedId"
                     ></v-select>
                   </v-flex>
-	                <v-flex md12 sm12 xs12>
-	                  <v-textarea outline
+                  <v-flex md6 sm6 xs12>
+                    <span class="small pt-4 d-block">Số lượng bài viết muốn comment</span>
+                  </v-flex>
+                  <v-flex md6 sm6 xs12>
+                    <v-text-field
+                      type="number"
+                      :disabled="data.length > 0"
+                      v-model="limit"/>
+                  </v-flex>
+                  <v-flex md6 sm6 xs12 v-if="item.value === 'feed'">
+                    <span class="small pt-4 d-block">ID bài viết</span>
+                  </v-flex>
+                  <v-flex md6 sm6 xs12 v-if="item.value === 'feed'">
+                    <v-text-field
+                      type="number"
+                      :disabled="data.length > 0"
+                      v-model.lazy="posts_id">
+                    </v-text-field>
+                  </v-flex>
+                  <v-flex md12 sm12 xs12>
+                    <v-textarea outline
                       v-model.lazy="comment"
                       :disabled="is_start"
                       label="Nhập bình luận..."></v-textarea>
-	                </v-flex>
+                  </v-flex>
                   <v-flex md12 sm12 xs12>
                     <v-text-field outline
                       v-model.lazy="url_picture"
@@ -75,62 +84,68 @@
                 </v-layout>
               </v-card-title>
             </v-card>
+
+            <v-layout row wrap>
+              <v-flex md4 sm6 xs12>
+                <v-btn v-if="data.length === 0"
+                  color="info"
+                  :loading="loading"
+                  :disabled="loading"
+                  @click="getData(selectedId, limit, posts_id)">Lấy bài viết
+                </v-btn>
+                <v-btn v-else
+                  color="success"
+                  :loading="loading"
+                  :disabled="loading"
+                  @click="startComment(selectedId, posts, comment, url_picture)">Bắt đầu Comment
+                </v-btn>
+                <v-btn v-if="is_start"
+                  color="warning"
+                  @click="is_start = false">Dừng Auto!
+                </v-btn>
+              </v-flex>
+
+                <v-spacer></v-spacer>
+                
+              <v-flex md4 sm6 xs12>
+                <v-btn v-if="postHasCommented.length === 0"
+                  color="warning"
+                  :loading="loading"
+                  :disabled="loading"
+                  @click="getPostHasCommented(selectedId)">Lấy các bài viết đã Comment</v-btn>
+                <v-btn v-else
+                  color="error"
+                  :loading="loading"
+                  :disabled="loading"
+                  @click="deleteComment(selectedId, postHasCommented)">Xóa</v-btn>
+              </v-flex>
+            </v-layout>
           </v-tab-item>
         </v-tabs-items>
 
-        <v-layout row wrap>
-          <v-flex md4 sm6 xs12>
-            <v-btn v-if="posts.length === 0"
-              color="info"
-              :loading="loading"
-              :disabled="loading"
-              @click="getPosts(selectedId, limitPosts)">Lấy bài viết
-            </v-btn>
-            <v-btn v-else
-              color="success"
-              :loading="loading"
-              :disabled="loading"
-              @click="startComment(selectedId, posts, comment, url_picture)">Bắt đầu Comment
-            </v-btn>
-            <v-btn v-if="is_start"
-              color="warning"
-              @click="is_start = false">Dừng Auto!
-            </v-btn>
-          </v-flex>
-
-            <v-spacer></v-spacer>
-            
-          <v-flex md4 sm6 xs12>
-            <v-btn v-if="postHasCommented.length === 0"
-              color="warning"
-              :loading="loading"
-              :disabled="loading"
-              @click="getPostHasCommented(selectedId)">Lấy các bài viết đã Comment</v-btn>
-            <v-btn v-else
-              color="error"
-              :loading="loading"
-              :disabled="loading"
-              @click="deleteComment(selectedId, postHasCommented)">Xóa tất cả Comment</v-btn>
-          </v-flex>
-        </v-layout>
+        
       </app-card>
     </v-layout>
   </v-container>
 </div>
 </template>
 <script>
-import { sleep_loop } from "Helpers/helpers";
+import { sleep_loop } from "Helpers/helpers"
 
 export default {
   data () {
     return {
-      tab: 'auto-comment-home',
+      tab: 'auto-comment-feed',
+      items: [
+        { text: 'Home (NewFeed)', value: 'home' },
+        { text: 'Feed (Wall)', value: 'feed' },
+      ],
       is_start: false,
-      items: ['home'],
+      limit: 10,
       comment: '',
       loading: false,
-      posts: [],
-      limitPosts: 50,
+      data: [],
+      posts_id: 0,
       postHasCommented: [],
       url_picture: ''
     }
@@ -155,28 +170,45 @@ export default {
     }
   },
   methods: {
-    getPosts(uid, limitPosts) {
+    VueNotify(type, message) {
+      Vue.notify({
+        group: 'app',
+        type: type,
+        text: message
+      });
+    },
+    getData(p_uid, limit, posts_id) {
       this.loading = true;
-      Vue.http.post(route('facebook.auto.comment'), {
-        uid: uid,
-        limitCommentPosts: limitPosts
-      }).then((response) => response.json())
-        .then((posts) => {
-          this.posts = posts;
-          this.loading = false;
-          Vue.notify({
-            group: 'app',
-            type: 'success',
-            text: 'Lấy bài viết thành công!'
+      if (this.tab === 'auto-comment-home') {
+        Vue.http.post(route('facebook.auto.comment-home'), {
+          p_uid: p_uid,
+          limit: limit
+        }).then((response) => response.json())
+          .then((posts) => {
+            this.posts = posts;
+            this.loading = false;
+            this.VueNotify('success', 'Lấy bài viết thành công!');
+          }, (error) => {
+            this.VueNotify('error', error.body);
+            this.loading = false;
           });
-        }, (error) => {
-          Vue.notify({
-            group: 'app',
-            type: 'error',
-            text: error.body
+      } else if (this.tab === 'auto-comment-feed') {
+        Vue.http.post(route('facebook.posts.interact', {
+          p_uid: p_uid,
+          posts_id: posts_id
+        }), {
+          limit: limit
+        }).then((response) => response.json())
+          .then((posts) => {
+            this.posts = posts;
+            this.loading = false;
+            this.VueNotify('success', '');
+          }, (error) => {
+            this.VueNotify('error', error.body);
+            this.loading = false;
           });
-          this.loading = false;
-        });
+      }
+      
     },
     async startComment(uid, posts, comment, url_picture) {
       this.is_start = true;

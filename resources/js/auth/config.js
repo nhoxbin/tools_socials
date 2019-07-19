@@ -28,18 +28,18 @@ export const AUTH_CONFIG = {
 		path: '/session/login'
 	},
 	notFoundRedirect: {
-		path: '/dashboard'
+		path: '/facebook/dashboard'
 	},
 	registerData: {
 		url: auth_path + 'register',
-		redirect: '/dashboard',
+		redirect: '/facebook/account',
 		method: 'POST',
 		autoLogin: true
 	},
 	loginData: {
 		url: auth_path + 'login',
 		method: 'POST',
-		// redirect: '/dashboard',
+		redirect: '/facebook/account',
 		fetchUser: true,
 	},
 	logoutData: {

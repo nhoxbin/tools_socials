@@ -10,6 +10,16 @@ use Session;
 
 class FeedController extends Controller
 {
+	private $account;
+
+	public function __construct(Request $request) {
+		$uid = $request->uid;
+		if (is_numeric($uid)) {
+			$this->account = FBAccount::find($uid);
+		}
+		dd($this->account);
+	}
+	
 	private function getReactions($url, array $reactions) {
 		// get data and paging in feed
 		$feed = json_decode(Curl::to($url)->get(), true);
@@ -105,31 +115,6 @@ class FeedController extends Controller
 		return view('auto.status.getstatus', compact('user', 'socials', 'stt_data'));
 	}
 
-	public function Ajax_LoadMorePost(Request $request, $uid) {
-		if ($request->ajax()) {
-			$user = Social::where('provider_uid', $uid)->get()->first();
-			if (!$user) {
-				return 'Invalid Facebook ID';
-			}
-			if (session('stt_page')) {
-				$stt_page = $request->session()->get('stt_page');
-				$request->session()->forget('stt_page');
-
-				$feed = Curl::to($stt_page)->get();
-				$feed_data = str_replace('\\n', '<br />', $feed);
-				$feed = json_decode($feed_data, true);
-			}
-			if (isset($feed['paging']['next']) && isset($stt_page)) {
-				$request->session()->put('stt_page', $feed['paging']['next']);
-			}
-			if (!empty($feed['data'])) {
-				return $feed['data'];
-			}
-			return 'okay';
-		}
-		return redirect('home')->with('error', 'Yêu cầu không đúng !');
-	}
-
 	public function postStatus(Request $request) {
 		$socials = Social::where('user_id', Auth::user()->id)->get()->toArray();
 		if (!$socials) {
@@ -176,7 +161,7 @@ class FeedController extends Controller
 		return back()->with('success', 'Đăng bài thành công. <a href="https://fb.com/' . $feed['id'] . '" target="_blank">Ấn vào đây</a> để xem bài viết của bạn');
 	}
 
-	public function postUnpublishedPhotos($files, $captions, $social) {
+	public function postUnPublishedPhotos($files, $captions, $social) {
 		$photos = [];
 		$attached_media = [];
 		$media_fbid = [];
@@ -215,23 +200,5 @@ class FeedController extends Controller
 			return back()->with(['success' => 'Xóa bài viết thành công !', 'del' => true]);
 		}
 		return back()->with('error', 'Có lỗi xảy ra khi xóa bài viết !');
-	}
-
-	public function Ajax_DeleteStatus(Request $request, $iduser) {
-		if ($request->ajax()) {
-			$user = Social::where('provider_uid', $iduser)->get()->first();
-			if (!$user) {
-				return 'User doesn\'t exists';
-			}
-			$user = $user->toArray();
-			$url_del_stt = mkurl(true, 'graph', 'facebook.com', $request->idstt, ['access_token' => $user['access_token']]);
-			$delstt = json_decode(Curl::to($url_del_stt)->delete(), true);
-			if ($delstt === true) {
-				return 'okay';
-			}
-
-			return 'okay';
-		}
-		return 'notokay';
 	}
 }

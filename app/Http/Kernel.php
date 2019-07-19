@@ -63,7 +63,7 @@ class Kernel extends HttpKernel
 
         'isAdmin' => \App\Http\Middleware\CheckIsAdmin::class,
         'isAdminOrSelf' => \App\Http\Middleware\CheckIsAdminOrSelf::class,
-        'memberCannotLoginFBTwice' => \App\Http\Middleware\CheckIsMember::class,
+        'checkRole' => \App\Http\Middleware\CheckIsMember::class,
         'hasAccountFB' => \App\Http\Middleware\CheckHasAccountFB::class,
     ];
 

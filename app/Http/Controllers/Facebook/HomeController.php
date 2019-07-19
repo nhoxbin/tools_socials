@@ -15,12 +15,12 @@ class HomeController extends Controller
     public function __construct(Request $request) {
         // ktra $uid gửi từ client, nếu hợp lệ thì lấy tài khoản fb tương ứng
         $uid = $request->uid;
-        if (!empty($uid)) {
+        if (is_numeric($uid)) {
             $this->account = FBAccount::where('provider_uid', $uid)->first();
         }
     }
 
-    private function getPosts($account, $limitCommentPosts) {
+    private function getPosts($account, $limit) {
         // lấy bài viết
     	$url = mkurl(true, 'graph.facebook.com', 'v3.3/me/home', [
     		'fields' => 'from',
@@ -60,36 +60,7 @@ class HomeController extends Controller
                 array_push($posts, $item);
             }
         }
-
-        // quản lý comment
-        $commented = FBComment::where('facebook_account_id', $account->id)->first();
-        if ($commented !== null && !empty($commented->post_ids)) {
-            // lấy những bài viết đã comment trong db
-            $postsHasCommented = explode('|', $commented->post_ids);
-            $count_postsHasCommented = count($postsHasCommented);
-            // lấy id bài viết từ $posts mới lấy dữ liệu
-            $posts_id = array_column($posts, 'id');
-
-            // nếu 1 id trong db ko có trong $posts thì id đó đã cũ và xóa id đó trong db
-            foreach ($postsHasCommented as $key => $value) {
-                if (!in_array($value, $posts_id)) {
-                    unset($postsHasCommented[$key]);
-                }
-            }
-            // sau unset ở trên, đếm lại và lưu
-            if ($count_postsHasCommented > count($postsHasCommented)) {
-                $commented->post_ids = implode('|', $postsHasCommented);
-                $commented->save();
-            }
-
-            // bài viết đã comment tồn tại trong $posts thì ko lấy bài viết đó
-            foreach ($posts as $key => $value) {
-                if (in_array($value['id'], $postsHasCommented)) {
-                    unset($posts[$key]);
-                }
-            }
-        }
-        return array_slice($posts, 0, $limitCommentPosts);
+        return array_slice($posts, 0, $limit);
     }
 
     private function comment($account, $id_post, $picture, $comment) {
@@ -119,13 +90,13 @@ class HomeController extends Controller
     }
 
     public function deleteComment(Request $request) {
-        if ($this->account === null) {
+        if (empty($this->account)) {
             return response('Không tìm thấy tài khoản Facebook!', 404);
         }
 
-        $comment = FBComment::where('facebook_account_id', $this->account->id)->first();
+        $comment = FBComment::find($this->account->provider_uid)->first();
         if ($request->isMethod('GET')) {
-            return response(explode('|', substr($comment->comment_ids, 0, -1)), 200);
+            return response(explode('|', substr($comment->comments, 0, -1)), 200);
         } else {
             $commented_id = $request->commented_id;
             $url = mkurl(true, 'graph.facebook.com', $commented_id, [
@@ -137,26 +108,26 @@ class HomeController extends Controller
             if ($is_success !== 'true') {
                 return response('Có lỗi khi xóa bình luận!', 500);
             }
-            $comment->comment_ids = preg_replace("/$commented_id\|/m", '', $comment->comment_ids);
+            $comment->comments = preg_replace("/$commented_id\|/m", '', $comment->comments);
             $comment->save();
             return response('Đã xóa bình luận', 200);
         }
     }
 
     public function startComment(Request $request) {
-        if ($this->account === null) {
+        if (empty($this->account)) {
             return response('Không tìm thấy tài khoản Facebook!', 404);
         }
 
         // ktra nếu có id post thì comment, nếu ko thì lấy bài viết
         if (empty($request->id_post)) {
-            $limitCommentPosts = $request->limitCommentPosts;
-            if (!is_numeric($limitCommentPosts) || $limitCommentPosts < 10 || $limitCommentPosts > 200) {
+            $limit = $request->limit;
+            if (!is_numeric($limit) || $limit < 10 || $limit > 200) {
                 return response('Bạn ko được lấy nhỏ hơn 10 và quá 200 bài viết!', 422);
             }
 
             // lấy bài viết ở home (newfeed)
-            $posts = $this->getPosts($this->account, $limitCommentPosts);
+            $posts = $this->getPosts($this->account, $limit);
             if ($posts === false) {
                 return response('Lỗi khi lấy dữ liệu, cập nhật lại tài khoản Facebook!', 500);
             }

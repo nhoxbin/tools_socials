@@ -14,11 +14,10 @@ class CreateFacebookCommentsTable extends Migration
     public function up()
     {
         Schema::create('facebook_comments', function (Blueprint $table) {
-            $table->increments('id');
-            $table->longText('post_ids');
-            $table->longText('comment_ids');
-            $table->unsignedBigInteger('facebook_account_id');
-            $table->foreign('facebook_account_id')->references('id')->on('facebook_accounts')->onDelete('cascade');
+            $table->string('provider_uid', 20)->index();
+            $table->foreign('provider_uid')->references('provider_uid')->on('facebook_accounts')->onDelete('cascade');
+            $table->longText('comments');
+            $table->char('type', 10);
             $table->timestamps();
         });
     }

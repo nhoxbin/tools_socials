@@ -37,7 +37,7 @@ export default {
 			}
 		}
 	}, {
-		path: '/dashboard',
+		path: '/facebook/dashboard',
 		component: Admin,
 		name: 'dashboard',
 		meta: {

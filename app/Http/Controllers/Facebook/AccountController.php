@@ -17,7 +17,7 @@ class AccountController extends Controller
 
     public function show() {
         $account = FBAccount::where('user_id', auth()->id())
-            ->select('id', 'provider_uid', 'name', 'is_active', 'status', 'user_id')
+            ->select('provider_uid', 'name', 'is_active', 'status', 'user_id')
             ->get();
             
         return response($account, 200);

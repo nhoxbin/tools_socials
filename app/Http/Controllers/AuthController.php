@@ -40,7 +40,7 @@ class AuthController extends Controller
     }
 
     public function user() {
-        $user = User::with('role', 'facebook:id,name,provider_uid,status,is_active,user_id')
+        $user = User::with('role', 'facebook:provider_uid,name,status,is_active,user_id')
             ->where('id', auth()->id())
             ->select('id', 'username', 'email', 'role_id')
             ->first();

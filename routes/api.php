@@ -43,14 +43,18 @@ Route::group([
 ], function() {
 
     Route::post('login', 'AccountController@login')
-        ->middleware('memberCannotLoginFBTwice')
+        ->middleware('checkRole') // memberCannotLoginFBTwice
         ->name('login');
 
     Route::get('account', 'AccountController@show')->name('account.show');
     Route::post('/account/update', 'AccountController@update')->name('account.update');
 
-    Route::group(['middleware' => 'hasAccountFB'], function() {
-        Route::group(['as' => 'feed.', 'prefix' => 'feed'], function() {
+    Route::group([
+        'prefix' => '{p_uid}',
+        'middleware' => 'hasAccountFB',
+        'where' => ['p_uid' => '[0-9]+']
+    ], function() {
+        /*Route::group(['as' => 'feed.', 'prefix' => 'feed'], function() {
             Route::post('reactions', 'FeedController@reactions')->name('reactions');
         });
 
@@ -66,15 +70,21 @@ Route::group([
         Route::group(['as' => 'groups.', 'prefix' => 'groups'], function() {
             Route::get('/list', 'GroupsController@getList')->name('list');
             Route::post('/out', 'GroupsController@out')->name('out');
+        });*/
+
+        Route::group(['as' => 'posts.', 'prefix' => 'posts'], function() {
+            Route::post('{posts_id}/interact/{limit}', 'PostsController@interact')
+                ->where(['posts_id' => '[0-9]+', 'limit' => '[0-9]+'])
+                ->name('interact');
         });
 
         Route::group(['as' => 'auto.', 'prefix' => 'auto'], function() {
             // inbox
-            Route::match(['GET', 'POST'], '/inbox', 'MessengerController@inbox')->name('inbox');
+            // Route::match(['GET', 'POST'], '/inbox', 'MessengerController@inbox')->name('inbox');
             // comment
-            Route::post('/comment', 'HomeController@startComment')->name('comment');
+            Route::post('/comment-home', 'HomeController@startComment')->name('comment-home');
             // xóa comment
-            Route::match(['GET', 'POST'], '/comment/delete/{uid}', 'HomeController@deleteComment')->where('uid', '[0-9]+')->name('delete-comment');
+            // Route::match(['GET', 'POST'], '/comment/delete/{uid}', 'HomeController@deleteComment')->where('uid', '[0-9]+')->name('delete-comment');
         });
     });
 });

@@ -29,6 +29,12 @@ const actions = {
 		// after sign up success, auto login
 		auth.register({
 			body: JSON.stringify(userDetail),
+			success: function(response) {
+				context.commit('authNotify', {
+					type: 'success',
+					message: response.body
+				});
+			},
 			error: function(error) {
 				if (typeof error.body === 'object') {
 					let errors = error.body.errors;
