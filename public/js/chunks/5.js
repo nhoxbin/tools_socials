@@ -10,6 +10,10 @@
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 //
 //
 //
@@ -104,29 +108,23 @@ __webpack_require__.r(__webpack_exports__);
       }]
     };
   },
-  computed: {
-    account: function account() {
-      return this.$auth.user().facebook;
-    },
-    has_account: function has_account() {
-      return !_.isEmpty(this.$auth.user().facebook);
+  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])({
+    account: 'facebookAccount',
+    has_account: 'checkFacebookAccount'
+  }), {
+    member: function member() {
+      if (this.$auth.user().role === 'Member') {
+        return true;
+      }
     },
     status: function status() {
-      if (_.isEmpty(this.$auth.user().facebook)) {
-        return true;
-      } else {
-        if (this.$auth.user().role.name !== 'Member') {
+      if (this.has_account && this.member) {
+        if (this.$auth.user().facebook[0].is_active === 0) {
           return true;
-        } else {
-          if (this.$auth.user().facebook[0].is_active === 0) {
-            return true;
-          } else {
-            return false;
-          }
         }
       }
     }
-  },
+  }),
   methods: {
     submit: function submit() {
       if (this.$refs.form.validate()) {
@@ -216,7 +214,7 @@ var render = function() {
                 "v-container",
                 { attrs: { fluid: "", "grid-list-xl": "", "py-0": "" } },
                 [
-                  _vm.status
+                  !_vm.has_account || !_vm.member || _vm.status
                     ? _c(
                         "app-card",
                         {

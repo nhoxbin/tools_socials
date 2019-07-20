@@ -72,23 +72,24 @@ Route::group([
             Route::post('/out', 'GroupsController@out')->name('out');
         });*/
 
-        Route::group(['as' => 'posts.', 'prefix' => 'posts'], function() {
-            Route::post('{posts_id}/interact/{limit}', 'PostsController@interact')
-                ->where(['posts_id' => '[0-9]+', 'limit' => '[0-9]+'])
-                ->name('interact');
-        });
+        // lấy bài viết trên tường nhà của nhiều user
+        Route::get('users/{uids}/posts/{limit}', 'MultiThreadsController@getMultiPostsOfMultiUser')
+            ->where('limit', '[0-9]+')
+            ->name('multi-threads.getMultiPostsOfMultiUser');
 
         Route::group(['as' => 'auto.', 'prefix' => 'auto'], function() {
             // inbox
             // Route::match(['GET', 'POST'], '/inbox', 'MessengerController@inbox')->name('inbox');
             // comment
-            Route::post('/comment-home', 'HomeController@startComment')->name('comment-home');
+            // Route::post('/comment-home', 'HomeController@startComment')->name('comment-home');
+            Route::post('/{id_post}/comment', 'CommentController@create')->name('comment');
             // xóa comment
             // Route::match(['GET', 'POST'], '/comment/delete/{uid}', 'HomeController@deleteComment')->where('uid', '[0-9]+')->name('delete-comment');
         });
     });
 });
 
+Route::get('test', 'TestController@test');
 
 Route::any('/{any}', function() {
     return response('404 Not found!', 404);

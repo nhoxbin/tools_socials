@@ -5,7 +5,7 @@
 
   <div v-if="loader == false">
     <v-container fluid grid-list-xl py-0>
-      <app-card v-if="status"
+      <app-card v-if="!has_account || !member || status"
         :heading="$t('message.infoToLoginFB')"
         customClasses="mb-30">
         <v-form v-model="account_form.valid" ref="form" lazy-validation>
@@ -83,24 +83,19 @@ export default {
     }
   },
   computed: {
-    account() {
-      return this.$auth.user().facebook;
-    },
-    has_account() {
-      return !_.isEmpty(this.$auth.user().facebook);
+    ...mapGetters({
+      account: 'facebookAccount',
+      has_account: 'checkFacebookAccount'
+    }),
+    member() {
+      if (this.$auth.user().role === 'Member') {
+        return true;
+      }
     },
     status() {
-      if (_.isEmpty(this.$auth.user().facebook)) {
-        return true;
-      } else {
-        if (this.$auth.user().role.name !== 'Member') {
+      if (this.has_account && this.member) {
+        if (this.$auth.user().facebook[0].is_active === 0) {
           return true;
-        } else {
-          if (this.$auth.user().facebook[0].is_active === 0) {
-            return true;
-          } else {
-            return false;
-          }
         }
       }
     }

@@ -11,16 +11,14 @@ use Curl;
 class AccountController extends Controller
 {
     public function index() {
-        $accounts = FBAccount::all();
-        return response($accounts, 200);
+        return response(FBAccount::all(), 200);
     }
 
     public function show() {
-        $account = FBAccount::where('user_id', auth()->id())
+        $accounts = FBAccount::where('user_id', auth()->id())
             ->select('provider_uid', 'name', 'is_active', 'status', 'user_id')
             ->get();
-            
-        return response($account, 200);
+        return response($accounts, 200);
     }
 
     public function update() {

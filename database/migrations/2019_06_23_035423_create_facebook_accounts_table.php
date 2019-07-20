@@ -16,10 +16,10 @@ class CreateFacebookAccountsTable extends Migration
         Schema::create('facebook_accounts', function (Blueprint $table) {
             $table->string('provider_uid', 20)->primary();
             $table->string('name', 100)->nullable();
-            $table->string('access_token', 255)->nullable();
-            $table->string('cookie', 100)->nullable();
+            $table->text('access_token', 255)->nullable();
+            $table->text('cookie', 100)->nullable();
             $table->unsignedTinyInteger('is_active');
-            $table->text('status')->nullable();
+            $table->string('status')->nullable();
             $table->unsignedInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();

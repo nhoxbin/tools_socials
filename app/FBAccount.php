@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class FBAccount extends Model
 {
 	protected $table = 'facebook_accounts';
+	protected $primaryKey = 'provider_uid';
+	public $incrementing = false;
 	
     public $fillable = [
     	'provider_uid',

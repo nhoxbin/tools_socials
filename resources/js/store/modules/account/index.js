@@ -8,7 +8,7 @@ const getters = {
 		return state.account;
 	},
 	checkFacebookAccount(state) {
-		return state.account != null ? true : false;
+		return state.account === null ? false : true;
 	}
 }
 

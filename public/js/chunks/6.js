@@ -142,13 +142,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -162,33 +155,31 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         value: 'feed'
       }],
       is_start: false,
+      loading: false,
       limit: 10,
       comment: '',
-      loading: false,
       data: [],
-      posts_id: 0,
+      uids: '100006508931079,100025602870873,100004931401259,100008978522629,100024151687853',
       postHasCommented: [],
       url_picture: ''
     };
   },
   computed: {
-    ids: function ids() {
+    p_uids: function p_uids() {
       var arr = [];
 
       _.forEach(this.$auth.user().facebook, function (value, index) {
-        if (value.is_active) {
-          arr[index] = {
-            text: value.name,
-            value: value.provider_uid
-          };
-        }
+        arr[index] = {
+          text: value.name,
+          value: value.provider_uid
+        };
       });
 
       return arr;
     },
     selectedId: {
       get: function get() {
-        return this.ids[0].value;
+        return this.p_uids[0].value;
       },
       set: function set(val) {
         return val;
@@ -203,7 +194,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         text: message
       });
     },
-    getData: function getData(p_uid, limit, posts_id) {
+    getData: function getData(p_uid, limit, uids) {
       var _this = this;
 
       this.loading = true;
@@ -214,8 +205,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           limit: limit
         }).then(function (response) {
           return response.json();
-        }).then(function (posts) {
-          _this.posts = posts;
+        }).then(function (data) {
+          _this.data = data;
           _this.loading = false;
 
           _this.VueNotify('success', 'Lấy bài viết thành công!');
@@ -225,18 +216,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           _this.loading = false;
         });
       } else if (this.tab === 'auto-comment-feed') {
-        Vue.http.post(route('facebook.posts.interact', {
+        Vue.http.get(route('facebook.multi-threads.getMultiPostsOfMultiUser', {
           p_uid: p_uid,
-          posts_id: posts_id
-        }), {
+          uids: uids,
           limit: limit
-        }).then(function (response) {
+        })).then(function (response) {
           return response.json();
-        }).then(function (posts) {
-          _this.posts = posts;
+        }).then(function (data) {
+          _this.data = data;
           _this.loading = false;
 
-          _this.VueNotify('success', '');
+          _this.VueNotify('success', 'Lấy bài viết thành công!');
         }, function (error) {
           _this.VueNotify('error', error.body);
 
@@ -247,55 +237,48 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     startComment: function () {
       var _startComment = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(uid, posts, comment, url_picture) {
-        var _this2 = this;
-
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(p_uid, data, comment, url_picture) {
+        var self;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 this.is_start = true;
                 this.loading = true;
-                _context2.next = 4;
-                return Object(Helpers_helpers__WEBPACK_IMPORTED_MODULE_1__["sleep_loop"])(posts, [5, 10],
+                self = this;
+                _context2.next = 5;
+                return Object(Helpers_helpers__WEBPACK_IMPORTED_MODULE_1__["sleep_loop"])(data, [4, 7],
                 /*#__PURE__*/
                 function () {
                   var _ref = _asyncToGenerator(
                   /*#__PURE__*/
-                  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(val, index) {
+                  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(value, index) {
                     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
                       while (1) {
                         switch (_context.prev = _context.next) {
                           case 0:
-                            if (!(_this2.is_start === false)) {
+                            if (!(self.is_start === false)) {
                               _context.next = 5;
                               break;
                             }
 
-                            _this2.posts = [];
-                            _this2.loading = false;
+                            self.data = [];
+                            self.loading = false;
                             alert('Đã dừng Auto!');
                             return _context.abrupt("return", 'break');
 
                           case 5:
                             _context.next = 7;
-                            return Vue.http.post(route('facebook.auto.comment'), {
-                              uid: uid,
-                              id_post: val.id,
+                            return Vue.http.post(route('facebook.auto.comment', {
+                              p_uid: p_uid,
+                              id_post: value
+                            }), {
                               comment: comment,
                               url_picture: url_picture
-                            }).then(function (status) {
-                              Vue.notify({
-                                group: 'app',
-                                type: 'success',
-                                text: status.body + ' vào bài viết của ' + val.from.name
-                              });
+                            }).then(function (message) {
+                              self.VueNotify('success', message.body);
                             }, function (error) {
-                              Vue.notify({
-                                group: 'app',
-                                type: 'error',
-                                text: error.body
-                              });
+                              self.VueNotify('error', error.body);
                             });
 
                           case 7:
@@ -311,7 +294,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   };
                 }());
 
-              case 4:
+              case 5:
               case "end":
                 return _context2.stop();
             }
@@ -326,12 +309,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return startComment;
     }(),
     getPostHasCommented: function getPostHasCommented(uid) {
-      var _this3 = this;
+      var _this2 = this;
 
       this.loading = true;
       Vue.http.get(route('facebook.auto.delete-comment', uid)).then(function (response) {
-        _this3.postHasCommented = response.body;
-        _this3.loading = false;
+        _this2.postHasCommented = response.body;
+        _this2.loading = false;
         Vue.notify({
           group: 'app',
           type: 'success',
@@ -343,7 +326,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _deleteComment = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4(uid, postHasCommented) {
-        var _this4 = this;
+        var _this3 = this;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee4$(_context4) {
           while (1) {
@@ -382,8 +365,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                           case 2:
                             if (index === postHasCommented.length - 1) {
-                              _this4.postHasCommented = [];
-                              _this4.loading = false;
+                              _this3.postHasCommented = [];
+                              _this3.loading = false;
                             }
 
                           case 3:
@@ -460,19 +443,7 @@ var render = function() {
                     [
                       _c("v-list-tile-title", [
                         _vm._v(
-                          '\r\n          - Đây là phần mềm tự động nên khi ấn "Lấy bài viết" sẽ tự động lấy các bài viết ở newfeed\r\n          '
-                        )
-                      ]),
-                      _vm._v(" "),
-                      _c("v-list-tile-title", [
-                        _vm._v(
-                          '\r\n            - Khi ấn "Bắt đầu comment" sẽ hiện ra nút "Dừng Auto". Phần mềm sẽ tự động chạy và comment vào những bài viết đã lấy được\r\n          '
-                        )
-                      ]),
-                      _vm._v(" "),
-                      _c("v-list-tile-title", [
-                        _vm._v(
-                          '\r\n            - Khi ấn vào nút "Dừng Auto" phần mềm sẽ dừng tự động bình luận và trở lại trạng thái ban đầu để lấy bài viết\r\n          '
+                          '\r\n            - Ấn "Dừng Auto" sẽ trở lại trạng thái ban đầu!\r\n          '
                         )
                       ])
                     ],
@@ -579,7 +550,7 @@ var render = function() {
                                         [
                                           _c("v-select", {
                                             attrs: {
-                                              items: _vm.ids,
+                                              items: _vm.p_uids,
                                               disabled: _vm.data.length > 0
                                             },
                                             model: {
@@ -654,7 +625,7 @@ var render = function() {
                                                   staticClass:
                                                     "small pt-4 d-block"
                                                 },
-                                                [_vm._v("ID bài viết")]
+                                                [_vm._v("ID người dùng")]
                                               )
                                             ]
                                           )
@@ -673,15 +644,14 @@ var render = function() {
                                             [
                                               _c("v-text-field", {
                                                 attrs: {
-                                                  type: "number",
                                                   disabled: _vm.data.length > 0
                                                 },
                                                 model: {
-                                                  value: _vm.posts_id,
+                                                  value: _vm.uids,
                                                   callback: function($$v) {
-                                                    _vm.posts_id = $$v
+                                                    _vm.uids = $$v
                                                   },
-                                                  expression: "posts_id"
+                                                  expression: "uids"
                                                 }
                                               })
                                             ],
@@ -776,7 +746,7 @@ var render = function() {
                                               return _vm.getData(
                                                 _vm.selectedId,
                                                 _vm.limit,
-                                                _vm.posts_id
+                                                _vm.uids
                                               )
                                             }
                                           }
@@ -799,7 +769,7 @@ var render = function() {
                                             click: function($event) {
                                               return _vm.startComment(
                                                 _vm.selectedId,
-                                                _vm.posts,
+                                                _vm.data,
                                                 _vm.comment,
                                                 _vm.url_picture
                                               )
@@ -858,7 +828,11 @@ var render = function() {
                                             }
                                           }
                                         },
-                                        [_vm._v("Lấy các bài viết đã Comment")]
+                                        [
+                                          _vm._v(
+                                            "Lấy các bài viết đã Comment\r\n                "
+                                          )
+                                        ]
                                       )
                                     : _c(
                                         "v-btn",
@@ -877,7 +851,7 @@ var render = function() {
                                             }
                                           }
                                         },
-                                        [_vm._v("Xóa")]
+                                        [_vm._v("Xóa\r\n                ")]
                                       )
                                 ],
                                 1

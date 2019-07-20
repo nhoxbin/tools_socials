@@ -9,13 +9,7 @@
         colClasses="md12 sm12 xs12">
         <v-list>
           <v-list-tile-title>
-          - Đây là phần mềm tự động nên khi ấn "Lấy bài viết" sẽ tự động lấy các bài viết ở newfeed
-          </v-list-tile-title>
-          <v-list-tile-title>
-            - Khi ấn "Bắt đầu comment" sẽ hiện ra nút "Dừng Auto". Phần mềm sẽ tự động chạy và comment vào những bài viết đã lấy được
-          </v-list-tile-title>
-          <v-list-tile-title>
-            - Khi ấn vào nút "Dừng Auto" phần mềm sẽ dừng tự động bình luận và trở lại trạng thái ban đầu để lấy bài viết
+            - Ấn "Dừng Auto" sẽ trở lại trạng thái ban đầu!
           </v-list-tile-title>
         </v-list>
       </app-card>
@@ -45,7 +39,7 @@
                   </v-flex>
                   <v-flex md6 sm6 xs12>
                     <v-select
-                      :items="ids"
+                      :items="p_uids"
                       :disabled="data.length > 0"
                       v-model="selectedId"
                     ></v-select>
@@ -60,13 +54,12 @@
                       v-model="limit"/>
                   </v-flex>
                   <v-flex md6 sm6 xs12 v-if="item.value === 'feed'">
-                    <span class="small pt-4 d-block">ID bài viết</span>
+                    <span class="small pt-4 d-block">ID người dùng</span>
                   </v-flex>
                   <v-flex md6 sm6 xs12 v-if="item.value === 'feed'">
                     <v-text-field
-                      type="number"
                       :disabled="data.length > 0"
-                      v-model.lazy="posts_id">
+                      v-model.lazy="uids">
                     </v-text-field>
                   </v-flex>
                   <v-flex md12 sm12 xs12>
@@ -91,13 +84,13 @@
                   color="info"
                   :loading="loading"
                   :disabled="loading"
-                  @click="getData(selectedId, limit, posts_id)">Lấy bài viết
+                  @click="getData(selectedId, limit, uids)">Lấy bài viết
                 </v-btn>
                 <v-btn v-else
                   color="success"
                   :loading="loading"
                   :disabled="loading"
-                  @click="startComment(selectedId, posts, comment, url_picture)">Bắt đầu Comment
+                  @click="startComment(selectedId, data, comment, url_picture)">Bắt đầu Comment
                 </v-btn>
                 <v-btn v-if="is_start"
                   color="warning"
@@ -112,18 +105,18 @@
                   color="warning"
                   :loading="loading"
                   :disabled="loading"
-                  @click="getPostHasCommented(selectedId)">Lấy các bài viết đã Comment</v-btn>
+                  @click="getPostHasCommented(selectedId)">Lấy các bài viết đã Comment
+                </v-btn>
                 <v-btn v-else
                   color="error"
                   :loading="loading"
                   :disabled="loading"
-                  @click="deleteComment(selectedId, postHasCommented)">Xóa</v-btn>
+                  @click="deleteComment(selectedId, postHasCommented)">Xóa
+                </v-btn>
               </v-flex>
             </v-layout>
           </v-tab-item>
         </v-tabs-items>
-
-        
       </app-card>
     </v-layout>
   </v-container>
@@ -141,28 +134,26 @@ export default {
         { text: 'Feed (Wall)', value: 'feed' },
       ],
       is_start: false,
+      loading: false,
       limit: 10,
       comment: '',
-      loading: false,
       data: [],
-      posts_id: 0,
+      uids: '100006508931079,100025602870873,100004931401259,100008978522629,100024151687853',
       postHasCommented: [],
       url_picture: ''
     }
   },
   computed: {
-    ids() {
-      var arr = [];
+    p_uids() {
+      let arr = [];
       _.forEach(this.$auth.user().facebook, (value, index) => {
-        if (value.is_active) {
-          arr[index] = { text: value.name, value: value.provider_uid };
-        }
+        arr[index] = { text: value.name, value: value.provider_uid };
       });
       return arr;
     },
     selectedId: {
       get() {
-        return this.ids[0].value;
+        return this.p_uids[0].value;
       },
       set(val) {
         return val;
@@ -177,15 +168,15 @@ export default {
         text: message
       });
     },
-    getData(p_uid, limit, posts_id) {
+    getData(p_uid, limit, uids) {
       this.loading = true;
       if (this.tab === 'auto-comment-home') {
         Vue.http.post(route('facebook.auto.comment-home'), {
           p_uid: p_uid,
           limit: limit
         }).then((response) => response.json())
-          .then((posts) => {
-            this.posts = posts;
+          .then((data) => {
+            this.data = data;
             this.loading = false;
             this.VueNotify('success', 'Lấy bài viết thành công!');
           }, (error) => {
@@ -193,50 +184,42 @@ export default {
             this.loading = false;
           });
       } else if (this.tab === 'auto-comment-feed') {
-        Vue.http.post(route('facebook.posts.interact', {
+        Vue.http.get(route('facebook.multi-threads.getMultiPostsOfMultiUser', {
           p_uid: p_uid,
-          posts_id: posts_id
-        }), {
+          uids: uids,
           limit: limit
-        }).then((response) => response.json())
-          .then((posts) => {
-            this.posts = posts;
+        })).then((response) => response.json())
+          .then((data) => {
+            this.data = data;
             this.loading = false;
-            this.VueNotify('success', '');
+            this.VueNotify('success', 'Lấy bài viết thành công!');
           }, (error) => {
             this.VueNotify('error', error.body);
             this.loading = false;
           });
       }
-      
     },
-    async startComment(uid, posts, comment, url_picture) {
+    async startComment(p_uid, data, comment, url_picture) {
       this.is_start = true;
       this.loading = true;
-      await sleep_loop(posts, [5, 10], async(val, index) => {
-        if (this.is_start === false) {
-          this.posts = [];
-          this.loading = false;
+      var self = this;
+      await sleep_loop(data, [4, 7], async function(value, index) {
+        if (self.is_start === false) {
+          self.data = [];
+          self.loading = false;
           alert('Đã dừng Auto!');
           return 'break';
         }
-        await Vue.http.post(route('facebook.auto.comment'), {
-          uid: uid,
-          id_post: val.id,
+        await Vue.http.post(route('facebook.auto.comment', {
+          p_uid: p_uid,
+          id_post: value
+        }), {
           comment: comment,
           url_picture: url_picture
-        }).then((status) => {
-            Vue.notify({
-              group: 'app',
-              type: 'success',
-              text: status.body + ' vào bài viết của ' + val.from.name
-            });
+        }).then((message) => {
+            self.VueNotify('success', message.body);
           }, function(error) {
-            Vue.notify({
-              group: 'app',
-              type: 'error',
-              text: error.body
-            });
+            self.VueNotify('error', error.body);
           });
       });
     },
