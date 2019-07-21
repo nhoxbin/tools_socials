@@ -78,7 +78,7 @@ export function array_column(array, columnName) {
 
 export function sleep_loop(val, time, callback) {
 	let loop = (i) => {
-		setTimeout(() => {
+		var timeout = setTimeout(() => {
 			if (Array.isArray(time)) {
 				let start = time[0] * 1e3;
 				let end = time[1] * 1e3 - 1e3;
@@ -87,19 +87,16 @@ export function sleep_loop(val, time, callback) {
 				time = Math.floor(Math.random() * end) + start;
 			}
 
-			let action = callback(val[i], i);
-			if (action === 'break') {
-				return;
-			} else if (action === 'continue') {
-				i += 2;
-			} else {
-				if (i < val.length - 1) {
-					i++;
-				} else {
+			callback(val[i], i).then(function(status) {
+				if (status === 'break' || i >= val.length - 1) {
 					return;
+				} else if (status === 'continue') {
+					i += 2;
+				} else {
+					i++;
 				}
-			}
-			loop(i);
+				loop(i);
+			});
 		}, time);
 	}
 	let i = 0;

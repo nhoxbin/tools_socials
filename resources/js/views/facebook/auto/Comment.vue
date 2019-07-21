@@ -23,14 +23,14 @@
         <v-tabs v-model="tab">
           <v-tab v-for="(item, index) in items"
             :key="index"
-            :href="`#auto-comment-${item.value}`">
+            :href="item.value">
             {{ item.text }}
           </v-tab>
         </v-tabs>
         <v-tabs-items v-model="tab">
           <v-tab-item v-for="(item, index) in items"
             :key="index"
-            :value="`auto-comment-${item.value}`">
+            :value="item.value">
             <v-card flat>
               <v-card-title primary-title>
                 <v-layout row wrap>
@@ -51,7 +51,7 @@
                     <v-text-field
                       type="number"
                       :disabled="data.length > 0"
-                      v-model="limit"/>
+                      v-model="comment_fields.limit"/>
                   </v-flex>
                   <v-flex md6 sm6 xs12 v-if="item.value === 'feed'">
                     <span class="small pt-4 d-block">ID người dùng</span>
@@ -64,13 +64,13 @@
                   </v-flex>
                   <v-flex md12 sm12 xs12>
                     <v-textarea outline
-                      v-model.lazy="comment"
+                      v-model.lazy="comment_fields.message"
                       :disabled="is_start"
                       label="Nhập bình luận..."></v-textarea>
                   </v-flex>
                   <v-flex md12 sm12 xs12>
                     <v-text-field outline
-                      v-model.lazy="url_picture"
+                      v-model.lazy="comment_fields.url_picture"
                       :disabled="is_start"
                       label="URL hình ảnh..."/>
                   </v-flex>
@@ -84,13 +84,13 @@
                   color="info"
                   :loading="loading"
                   :disabled="loading"
-                  @click="getData(selectedId, limit, uids)">Lấy bài viết
+                  @click="getData(selectedId, comment_fields.limit, uids)">Lấy bài viết
                 </v-btn>
                 <v-btn v-else
                   color="success"
                   :loading="loading"
                   :disabled="loading"
-                  @click="startComment(selectedId, data, comment, url_picture)">Bắt đầu Comment
+                  @click="startComment(selectedId, tab, data, comment_fields.message, comment_fields.url_picture)">Bắt đầu Comment
                 </v-btn>
                 <v-btn v-if="is_start"
                   color="warning"
@@ -101,17 +101,17 @@
                 <v-spacer></v-spacer>
                 
               <v-flex md4 sm6 xs12>
-                <v-btn v-if="postHasCommented.length === 0"
+                <v-btn v-if="postsHasCommented.length === 0"
                   color="warning"
                   :loading="loading"
                   :disabled="loading"
-                  @click="getPostHasCommented(selectedId)">Lấy các bài viết đã Comment
+                  @click="getPostsHasCommented(selectedId, tab)">Lấy các bài viết đã Comment
                 </v-btn>
                 <v-btn v-else
                   color="error"
                   :loading="loading"
                   :disabled="loading"
-                  @click="deleteComment(selectedId, postHasCommented)">Xóa
+                  @click="deleteComment(selectedId, tab,  postsHasCommented)">Xóa
                 </v-btn>
               </v-flex>
             </v-layout>
@@ -128,19 +128,21 @@ import { sleep_loop } from "Helpers/helpers"
 export default {
   data () {
     return {
-      tab: 'auto-comment-feed',
+      tab: 'feed',
       items: [
         { text: 'Home (NewFeed)', value: 'home' },
         { text: 'Feed (Wall)', value: 'feed' },
       ],
       is_start: false,
       loading: false,
-      limit: 10,
-      comment: '',
       data: [],
-      uids: '100006508931079,100025602870873,100004931401259,100008978522629,100024151687853',
-      postHasCommented: [],
-      url_picture: ''
+      uids: '100003912253555,100003669722230',
+      postsHasCommented: [],
+      comment_fields: {
+        message: 'hello google',
+        url_picture: 'https://vnreview.vn/image/18/17/65/1817650.jpg',
+        limit: 10
+      }
     }
   },
   computed: {
@@ -170,7 +172,7 @@ export default {
     },
     getData(p_uid, limit, uids) {
       this.loading = true;
-      if (this.tab === 'auto-comment-home') {
+      if (this.tab === 'home') {
         Vue.http.post(route('facebook.auto.comment-home'), {
           p_uid: p_uid,
           limit: limit
@@ -183,8 +185,8 @@ export default {
             this.VueNotify('error', error.body);
             this.loading = false;
           });
-      } else if (this.tab === 'auto-comment-feed') {
-        Vue.http.get(route('facebook.multi-threads.getMultiPostsOfMultiUser', {
+      } else if (this.tab === 'feed') {
+        Vue.http.get(route('facebook.multi-threads.multiPostsOfMultiUser', {
           p_uid: p_uid,
           uids: uids,
           limit: limit
@@ -194,68 +196,65 @@ export default {
             this.loading = false;
             this.VueNotify('success', 'Lấy bài viết thành công!');
           }, (error) => {
-            this.VueNotify('error', error.body);
             this.loading = false;
+            this.VueNotify('error', error.body);
           });
       }
     },
-    async startComment(p_uid, data, comment, url_picture) {
+    startComment(p_uid, tab, data, message, url_picture) {
       this.is_start = true;
       this.loading = true;
-      var self = this;
-      await sleep_loop(data, [4, 7], async function(value, index) {
-        if (self.is_start === false) {
-          self.data = [];
-          self.loading = false;
+      sleep_loop(data, [2, 5], async(value, index) => {
+        if (this.is_start === false || index === data.length-1) {
+          this.data = [];
+          this.loading = false;
           alert('Đã dừng Auto!');
           return 'break';
         }
-        await Vue.http.post(route('facebook.auto.comment', {
+        await Vue.http.post(route('facebook.comment.create', {
           p_uid: p_uid,
-          id_post: value
         }), {
-          comment: comment,
+          type: tab,
+          comment: message,
           url_picture: url_picture
+          posts_id: value,
         }).then((message) => {
-            self.VueNotify('success', message.body);
+            this.VueNotify('success', message.body);
           }, function(error) {
-            self.VueNotify('error', error.body);
+            this.VueNotify('error', error.body);
           });
       });
     },
-    getPostHasCommented(uid) {
+    getPostsHasCommented(p_uid, type) {
       this.loading = true;
-      Vue.http.get(route('facebook.auto.delete-comment', uid)).then(response => {
-          this.postHasCommented = response.body;
+      Vue.http.get(route('facebook.comment.show', {
+        p_uid: p_uid,
+        type: type
+      })).then(response => {
+          this.postsHasCommented = response.body;
           this.loading = false;
-          Vue.notify({
-            group: 'app',
-            type: 'success',
-            text: 'Lấy những bài đã bình luận thành công, sẵn sàng xóa!'
-          });
+          this.VueNotify('success', 'Lấy thành công.');
+        }, error => {
+          this.loading = false;
+          this.VueNotify('error', error.body);
         });
     },
-    async deleteComment(uid, postHasCommented) {
+    deleteComment(uid, type, postsHasCommented) {
       this.loading = true;
-      await sleep_loop(postHasCommented, 2, async(val, index) => {
-        await Vue.http.post(route('facebook.auto.delete-comment', {uid: uid}), {
+      sleep_loop(postsHasCommented, 2, async(val, index) => {
+        await Vue.http.delete(route('facebook.comment.delete', {
+          uid: uid,
+          type: type
+        }), {
           commented_id: val
         }).then(status => {
-            Vue.notify({
-              group: 'app',
-              type: 'success',
-              text: status.body
-            });
+            this.VueNotify('success', status.body);
           }, error => {
-            Vue.notify({
-              group: 'app',
-              type: 'error',
-              text: error.body
-            });
+            this.VueNotify('error', error.body);
           });
 
-        if (index === postHasCommented.length-1) {
-          this.postHasCommented = [];
+        if (index === postsHasCommented.length-1) {
+          this.postsHasCommented = [];
           this.loading = false;
         }
       });
@@ -263,6 +262,3 @@ export default {
   }
 }
 </script>
-
-<style lang="css" scoped>
-</style>

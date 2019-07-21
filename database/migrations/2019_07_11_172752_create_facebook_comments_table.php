@@ -17,7 +17,7 @@ class CreateFacebookCommentsTable extends Migration
             $table->string('provider_uid', 20);
             $table->foreign('provider_uid')->references('provider_uid')->on('facebook_accounts')->onDelete('cascade');
             $table->text('comments');
-            $table->char('type', 10);
+            $table->string('type', 10);
             $table->primary(['provider_uid', 'type']);
             $table->timestamps();
         });

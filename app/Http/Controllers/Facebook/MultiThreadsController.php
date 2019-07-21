@@ -21,8 +21,8 @@ class MultiThreadsController extends Controller
     	if (empty($this->account)) {
 			return response('Không tìm thấy tài khoản Facebook!', 404);
 		}
-		if ($limit < 8 || $limit > 200) {
-			return response('Lấy từ 8 > 200 bài viết!', 500);
+		if ($limit < 10 || $limit > 200) {
+			return response('Lấy từ 10 > 200 bài viết!', 500);
 		}
 
     	$url = mkurl(true, 'graph.facebook.com', 'v3.3', [

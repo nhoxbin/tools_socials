@@ -72,20 +72,33 @@ Route::group([
             Route::post('/out', 'GroupsController@out')->name('out');
         });*/
 
-        // lấy bài viết trên tường nhà của nhiều user
-        Route::get('users/{uids}/posts/{limit}', 'MultiThreadsController@getMultiPostsOfMultiUser')
-            ->where('limit', '[0-9]+')
-            ->name('multi-threads.getMultiPostsOfMultiUser');
+        /*Route::group(['as' => 'get.'], function() {
+            // lấy bài viết trên tường nhà của nhiều user
+            Route::get('ids/{uids}/posts/{limit}', 'MultiThreadsController@getMultiPostsOfMultiUser')
+                ->where('limit', '[0-9]+')
+                ->name('multi-threads.getMultiPostsOfMultiUser');
 
-        Route::group(['as' => 'auto.', 'prefix' => 'auto'], function() {
-            // inbox
-            // Route::match(['GET', 'POST'], '/inbox', 'MessengerController@inbox')->name('inbox');
-            // comment
-            // Route::post('/comment-home', 'HomeController@startComment')->name('comment-home');
-            Route::post('/{id_post}/comment', 'CommentController@create')->name('comment');
+            // Route::get('comment/{type}', 'CommentController@show')->name('getPostsHasCommented');
+            Route::post('/{posts_id}/comment', 'CommentController@create')->name('comment');
+
             // xóa comment
-            // Route::match(['GET', 'POST'], '/comment/delete/{uid}', 'HomeController@deleteComment')->where('uid', '[0-9]+')->name('delete-comment');
-        });
+            Route::post('/comment/{type}/{comment_id}/delete', 'CommentController@delete')
+                ->where('comment_id', '[0-9]+')
+                ->name('delete.comment');
+        });*/
+
+        Route::resource('comment', 'CommentController', [
+            'names' => 'comment',
+            'except' => ['edit', 'update', 'store'],
+            'parameters' => ['comment' => 'type']
+        ]);
+
+        /*Route::group(['as' => 'auto.', 'prefix' => 'auto'], function() {
+            // inbox
+            Route::match(['GET', 'POST'], '/inbox', 'MessengerController@inbox')->name('inbox');
+            // comment
+            Route::post('/comment-home', 'HomeController@startComment')->name('comment-home');
+        });*/
     });
 });
 

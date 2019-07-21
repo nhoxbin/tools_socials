@@ -25,6 +25,6 @@ class FBAccount extends Model
 	}
 
 	public function comment() {
-		return $this->hasOne('App\FBComment');
+		return $this->hasMany('App\FBComment');
 	}
 }

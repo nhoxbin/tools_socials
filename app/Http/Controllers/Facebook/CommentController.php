@@ -19,12 +19,32 @@ class CommentController extends Controller
 		}
 	}
 
-    public function create(Request $request, $p_uid, $id_post) {
+    public function index($p_uid) {
+        if (empty($this->account)) {
+            return response('Không tìm thấy tài khoản Facebook!', 404);
+        }
+
+        $db_comment = FBComment::where('provider_uid', $p_uid)->get();
+        return response(explode('|', substr($db_comment->comments, 0, -1)), 200);
+    }
+
+    public function show($p_uid, $type) {
+        if (empty($this->account)) {
+            return response('Không tìm thấy tài khoản Facebook!', 404);
+        }
+
+        if ($type !== 'feed' && $type !== 'home') {
+            return response('Lỗi!', 404);
+        }
+        $db_comment = FBComment::where(['provider_uid' => $p_uid, 'type' => $type])->first();
+        return response(explode('|', substr($db_comment->comments, 0, -1)), 200);
+    }
+
+    public function create(Request $request, $p_uid, $posts_id) {
     	if (empty($this->account)) {
     		return response('Không tìm thấy tài khoản Facebook!', 404);
     	}
-
-    	$url = mkurl(true, 'graph.facebook.com', "v3.3/$id_post/comments", [
+    	$url = mkurl(true, 'graph.facebook.com', "v3.3/$request->posts_id/comments", [
     		'message' => $request->comment,
     		'attachment_url' => $request->url_picture,
     		'method' => 'post',
@@ -36,15 +56,35 @@ class CommentController extends Controller
     	}
 
     	$db_comment = FBComment::firstOrCreate([
-    		'provider_uid' => $p_uid
+    		'provider_uid' => $p_uid,
+    		'type' => $request->type
     	], [
-    		'comments' => $data['id'] . '|',
-    		'type' => 'user'
+    		'comments' => $data['id'] . '|'
     	]);
     	if (!$db_comment->wasRecentlyCreated) {
-    		$db_comment->comments .= $data['id'] . '|';
+    		$db_comment->comments .= ($data['id'] . '|');
     		$db_comment->save();
     	}
     	return response('Bình luận thành công!', 200);
+    }
+
+    public function destroy(Request $request, $p_uid, $type) {
+        if (empty($this->account)) {
+            return response('Không tìm thấy tài khoản Facebook!', 404);
+        }
+
+        $db_comment = FBComment::where(['provider_uid' => $p_uid, 'type' => $type])->first();
+
+        $url = mkurl(true, 'graph.facebook.com', "v3.3/$request->commented_id", [
+            'method' => 'delete',
+            'access_token' => $this->account->access_token
+        ]);
+        $is_success = Curl::to($url)->get();
+        if ($is_success !== 'true') {
+            return response('Có lỗi khi xóa bình luận!', 500);
+        }
+        $db_comment->comments = preg_replace("/$request->commented_id\|/m", '', $db_comment->comments);
+        $db_comment->save();
+        return response('Đã xóa bình luận', 200);
     }
 }
