@@ -146,7 +146,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      tab: 'feed',
+      tab: 'home',
       items: [{
         text: 'Home (NewFeed)',
         value: 'home'
@@ -218,7 +218,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           _this.loading = false;
         });
       } else if (this.tab === 'feed') {
-        Vue.http.get(route('facebook.multi-threads.multiPostsOfMultiUser', {
+        Vue.http.get(route('facebook.feed.getPosts', {
           p_uid: p_uid,
           uids: uids,
           limit: limit
@@ -251,7 +251,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
             while (1) {
               switch (_context.prev = _context.next) {
                 case 0:
-                  if (!(_this2.is_start === false || index === data.length - 1)) {
+                  if (!(_this2.is_start === false)) {
                     _context.next = 5;
                     break;
                   }
@@ -263,7 +263,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 case 5:
                   _context.next = 7;
-                  return Vue.http.post(route('facebook.comment.create', {
+                  return Vue.http.post(route('facebook.comment.store', {
                     p_uid: p_uid
                   }), {
                     type: tab,
@@ -273,10 +273,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   }).then(function (message) {
                     _this2.VueNotify('success', message.body);
                   }, function (error) {
-                    this.VueNotify('error', error.body);
+                    _this2.VueNotify('error', error.body);
                   });
 
                 case 7:
+                  if (index === data.length - 1) {
+                    _this2.data = [];
+                    _this2.loading = false;
+                    alert('Xong!!!');
+                  }
+
+                case 8:
                 case "end":
                   return _context.stop();
               }
@@ -307,7 +314,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         _this3.VueNotify('error', error.body);
       });
     },
-    deleteComment: function deleteComment(uid, type, postsHasCommented) {
+    deleteComment: function deleteComment(p_uid, type, postsHasCommented) {
       var _this4 = this;
 
       this.loading = true;
@@ -323,11 +330,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 case 0:
                   _context2.next = 2;
                   return Vue.http["delete"](route('facebook.comment.delete', {
-                    uid: uid,
-                    type: type
-                  }), {
+                    p_uid: p_uid,
+                    type: type,
                     commented_id: val
-                  }).then(function (status) {
+                  })).then(function (status) {
                     _this4.VueNotify('success', status.body);
                   }, function (error) {
                     _this4.VueNotify('error', error.body);
@@ -337,6 +343,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   if (index === postsHasCommented.length - 1) {
                     _this4.postsHasCommented = [];
                     _this4.loading = false;
+                    alert('Xong!!!');
                   }
 
                 case 3:
@@ -857,15 +864,14 @@ render._withStripped = true
 /*!******************************************************!*\
   !*** ./resources/js/views/facebook/auto/Comment.vue ***!
   \******************************************************/
-/*! no static exports found */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Comment_vue_vue_type_template_id_d00289ce___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Comment.vue?vue&type=template&id=d00289ce& */ "./resources/js/views/facebook/auto/Comment.vue?vue&type=template&id=d00289ce&");
 /* harmony import */ var _Comment_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Comment.vue?vue&type=script&lang=js& */ "./resources/js/views/facebook/auto/Comment.vue?vue&type=script&lang=js&");
-/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _Comment_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _Comment_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
@@ -895,7 +901,7 @@ component.options.__file = "resources/js/views/facebook/auto/Comment.vue"
 /*!*******************************************************************************!*\
   !*** ./resources/js/views/facebook/auto/Comment.vue?vue&type=script&lang=js& ***!
   \*******************************************************************************/
-/*! no static exports found */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

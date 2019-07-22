@@ -48,6 +48,7 @@ Route::group([
 
     Route::get('account', 'AccountController@show')->name('account.show');
     Route::post('/account/update', 'AccountController@update')->name('account.update');
+    // Route::resource('account', 'AccountController', ['only' => ['show', 'update']]);
 
     Route::group([
         'prefix' => '{p_uid}',
@@ -73,10 +74,7 @@ Route::group([
         });*/
 
         /*Route::group(['as' => 'get.'], function() {
-            // lấy bài viết trên tường nhà của nhiều user
-            Route::get('ids/{uids}/posts/{limit}', 'MultiThreadsController@getMultiPostsOfMultiUser')
-                ->where('limit', '[0-9]+')
-                ->name('multi-threads.getMultiPostsOfMultiUser');
+            
 
             // Route::get('comment/{type}', 'CommentController@show')->name('getPostsHasCommented');
             Route::post('/{posts_id}/comment', 'CommentController@create')->name('comment');
@@ -89,9 +87,15 @@ Route::group([
 
         Route::resource('comment', 'CommentController', [
             'names' => 'comment',
-            'except' => ['edit', 'update', 'store'],
+            'except' => ['edit', 'update', 'create', 'destroy'],
             'parameters' => ['comment' => 'type']
         ]);
+        Route::delete('comment/{type}/delete/{commented_id}', 'CommentController@delete')->name('comment.delete');
+
+        // lấy bài viết trên tường nhà của 1 hoặc nhiều user
+        Route::get('feed/{uids}/posts/{limit}', 'FeedController@getPosts')
+            ->where('limit', '[0-9]+')
+            ->name('feed.getPosts');
 
         /*Route::group(['as' => 'auto.', 'prefix' => 'auto'], function() {
             // inbox

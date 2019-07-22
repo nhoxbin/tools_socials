@@ -76,17 +76,20 @@ export function array_column(array, columnName) {
 	});
 }
 
-export function sleep_loop(val, time, callback) {
+export function sleep_loop(val, timeout, callback) {
 	let loop = (i) => {
-		var timeout = setTimeout(() => {
-			if (Array.isArray(time)) {
-				let start = time[0] * 1e3;
-				let end = time[1] * 1e3 - 1e3;
+		let time;
+		if (Array.isArray(timeout)) {
+			let start = timeout[0] * 1e3;
+			let end = timeout[1] * 1e3 - 1e3;
 
-				// milisecond từ (start) giây đến (end) giây
-				time = Math.floor(Math.random() * end) + start;
-			}
+			// milisecond từ (start) giây đến (end) giây
+			time = Math.floor(Math.random() * end) + start;
+		} else {
+			time = timeout * 1e3;
+		}
 
+		setTimeout(() => {
 			callback(val[i], i).then(function(status) {
 				if (status === 'break' || i >= val.length - 1) {
 					return;

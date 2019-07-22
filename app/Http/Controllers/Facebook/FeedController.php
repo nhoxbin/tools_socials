@@ -13,12 +13,40 @@ class FeedController extends Controller
 	private $account;
 
 	public function __construct(Request $request) {
-		$uid = $request->uid;
-		if (is_numeric($uid)) {
-			$this->account = FBAccount::find($uid);
+		$p_uid = $request->p_uid;
+		if (is_numeric($p_uid)) {
+			$this->account = FBAccount::where('provider_uid', $p_uid)->first();
 		}
-		dd($this->account);
 	}
+
+	public function getPosts($p_uid, $uids, $limit) {
+    	if (empty($this->account)) {
+			return response('Không tìm thấy tài khoản Facebook!', 404);
+		}
+		if (is_numeric($limit) && ($limit*2 < 5 || $limit*2 > 100)) {
+			return response('Lấy từ 5 > 100 bài viết!', 500);
+		}
+
+    	$url = mkurl(true, 'graph.facebook.com', 'v3.3', [
+    		'ids' => $uids,
+    		'fields' => "feed.limit($limit){id}",
+			'access_token' => $this->account->access_token
+		]);
+    	$data = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->get(), true);
+    	if (!empty($data['error'])) {
+    		return response('Có lỗi khi lấy bài viết, kiểm tra lại ID!', 500);
+    	}
+
+    	$posts = [];
+    	foreach ($data as $id => $value) {
+    		$user_posts = array_column($value['feed']['data'], 'id');
+    		foreach ($user_posts as $value) {
+    			array_push($posts, $value);
+    		}
+    	}
+
+    	return $posts;
+    }
 	
 	private function getReactions($url, array $reactions) {
 		// get data and paging in feed

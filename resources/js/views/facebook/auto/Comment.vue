@@ -128,7 +128,7 @@ import { sleep_loop } from "Helpers/helpers"
 export default {
   data () {
     return {
-      tab: 'feed',
+      tab: 'home',
       items: [
         { text: 'Home (NewFeed)', value: 'home' },
         { text: 'Feed (Wall)', value: 'feed' },
@@ -186,7 +186,7 @@ export default {
             this.loading = false;
           });
       } else if (this.tab === 'feed') {
-        Vue.http.get(route('facebook.multi-threads.multiPostsOfMultiUser', {
+        Vue.http.get(route('facebook.feed.getPosts', {
           p_uid: p_uid,
           uids: uids,
           limit: limit
@@ -205,13 +205,14 @@ export default {
       this.is_start = true;
       this.loading = true;
       sleep_loop(data, [2, 5], async(value, index) => {
-        if (this.is_start === false || index === data.length-1) {
+        if (this.is_start === false) {
           this.data = [];
           this.loading = false;
           alert('Đã dừng Auto!');
           return 'break';
         }
-        await Vue.http.post(route('facebook.comment.create', {
+
+        await Vue.http.post(route('facebook.comment.store', {
           p_uid: p_uid,
         }), {
           type: tab,
@@ -220,9 +221,15 @@ export default {
           posts_id: value
         }).then((message) => {
             this.VueNotify('success', message.body);
-          }, function(error) {
+          }, (error) => {
             this.VueNotify('error', error.body);
           });
+
+        if (index === data.length-1) {
+          this.data = [];
+          this.loading = false;
+          alert('Xong!!!');
+        }
       });
     },
     getPostsHasCommented(p_uid, type) {
@@ -239,15 +246,14 @@ export default {
           this.VueNotify('error', error.body);
         });
     },
-    deleteComment(uid, type, postsHasCommented) {
+    deleteComment(p_uid, type, postsHasCommented) {
       this.loading = true;
       sleep_loop(postsHasCommented, 2, async(val, index) => {
         await Vue.http.delete(route('facebook.comment.delete', {
-          uid: uid,
-          type: type
-        }), {
+          p_uid: p_uid,
+          type: type,
           commented_id: val
-        }).then(status => {
+        })).then(status => {
             this.VueNotify('success', status.body);
           }, error => {
             this.VueNotify('error', error.body);
@@ -256,6 +262,7 @@ export default {
         if (index === postsHasCommented.length-1) {
           this.postsHasCommented = [];
           this.loading = false;
+          alert('Xong!!!');
         }
       });
     }
