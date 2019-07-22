@@ -236,7 +236,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         });
       }
     },
-    startComment: function startComment(p_uid, data, message, url_picture) {
+    startComment: function startComment(p_uid, tab, data, message, url_picture) {
       var _this2 = this;
 
       this.is_start = true;
@@ -264,11 +264,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 case 5:
                   _context.next = 7;
                   return Vue.http.post(route('facebook.comment.create', {
-                    p_uid: p_uid,
-                    posts_id: value
+                    p_uid: p_uid
                   }), {
+                    type: tab,
                     comment: message,
-                    url_picture: url_picture
+                    url_picture: url_picture,
+                    posts_id: value
                   }).then(function (message) {
                     _this2.VueNotify('success', message.body);
                   }, function (error) {
@@ -321,23 +322,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               switch (_context2.prev = _context2.next) {
                 case 0:
                   _context2.next = 2;
-                  return Vue.http.post(route('facebook.comment.delete', {
+                  return Vue.http["delete"](route('facebook.comment.delete', {
                     uid: uid,
                     type: type
                   }), {
                     commented_id: val
                   }).then(function (status) {
-                    Vue.notify({
-                      group: 'app',
-                      type: 'success',
-                      text: status.body
-                    });
+                    _this4.VueNotify('success', status.body);
                   }, function (error) {
-                    Vue.notify({
-                      group: 'app',
-                      type: 'error',
-                      text: error.body
-                    });
+                    _this4.VueNotify('error', error.body);
                   });
 
                 case 2:
@@ -741,6 +734,7 @@ var render = function() {
                                             click: function($event) {
                                               return _vm.startComment(
                                                 _vm.selectedId,
+                                                _vm.tab,
                                                 _vm.data,
                                                 _vm.comment_fields.message,
                                                 _vm.comment_fields.url_picture
@@ -863,14 +857,15 @@ render._withStripped = true
 /*!******************************************************!*\
   !*** ./resources/js/views/facebook/auto/Comment.vue ***!
   \******************************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Comment_vue_vue_type_template_id_d00289ce___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Comment.vue?vue&type=template&id=d00289ce& */ "./resources/js/views/facebook/auto/Comment.vue?vue&type=template&id=d00289ce&");
 /* harmony import */ var _Comment_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Comment.vue?vue&type=script&lang=js& */ "./resources/js/views/facebook/auto/Comment.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _Comment_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _Comment_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
@@ -900,7 +895,7 @@ component.options.__file = "resources/js/views/facebook/auto/Comment.vue"
 /*!*******************************************************************************!*\
   !*** ./resources/js/views/facebook/auto/Comment.vue?vue&type=script&lang=js& ***!
   \*******************************************************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

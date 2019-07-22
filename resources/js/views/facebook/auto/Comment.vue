@@ -216,8 +216,8 @@ export default {
         }), {
           type: tab,
           comment: message,
-          url_picture: url_picture
-          posts_id: value,
+          url_picture: url_picture,
+          posts_id: value
         }).then((message) => {
             this.VueNotify('success', message.body);
           }, function(error) {
