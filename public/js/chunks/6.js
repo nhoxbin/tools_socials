@@ -200,48 +200,41 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _this = this;
 
       this.loading = true;
+      var url;
 
       if (this.tab === 'home') {
-        Vue.http.post(route('facebook.auto.comment-home'), {
+        url = route('facebook.home.getPosts', {
           p_uid: p_uid,
+          type: 'page',
           limit: limit
-        }).then(function (response) {
-          return response.json();
-        }).then(function (data) {
-          _this.data = data;
-          _this.loading = false;
-
-          _this.VueNotify('success', 'Lấy bài viết thành công!');
-        }, function (error) {
-          _this.VueNotify('error', error.body);
-
-          _this.loading = false;
         });
       } else if (this.tab === 'feed') {
-        Vue.http.get(route('facebook.feed.getPosts', {
+        url = route('facebook.feed.getPosts', {
           p_uid: p_uid,
           uids: uids,
           limit: limit
-        })).then(function (response) {
-          return response.json();
-        }).then(function (data) {
-          _this.data = data;
-          _this.loading = false;
-
-          _this.VueNotify('success', 'Lấy bài viết thành công!');
-        }, function (error) {
-          _this.loading = false;
-
-          _this.VueNotify('error', error.body);
         });
       }
+
+      Vue.http.get(url).then(function (response) {
+        return response.json();
+      }).then(function (data) {
+        _this.data = data;
+        _this.loading = false;
+
+        _this.VueNotify('success', 'Lấy bài viết thành công!');
+      }, function (error) {
+        _this.loading = false;
+
+        _this.VueNotify('error', error.body);
+      });
     },
     startComment: function startComment(p_uid, tab, data, message, url_picture) {
       var _this2 = this;
 
       this.is_start = true;
       this.loading = true;
-      Object(Helpers_helpers__WEBPACK_IMPORTED_MODULE_1__["sleep_loop"])(data, [2, 5],
+      Object(Helpers_helpers__WEBPACK_IMPORTED_MODULE_1__["sleep_loop"])(data, [5, 10],
       /*#__PURE__*/
       function () {
         var _ref = _asyncToGenerator(
@@ -442,7 +435,7 @@ var render = function() {
                     _vm._l(_vm.items, function(item, index) {
                       return _c(
                         "v-tab",
-                        { key: index, attrs: { href: item.value } },
+                        { key: index, attrs: { href: "#" + item.value } },
                         [
                           _vm._v(
                             "\r\n            " +

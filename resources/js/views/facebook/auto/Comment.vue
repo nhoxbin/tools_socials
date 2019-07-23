@@ -23,7 +23,7 @@
         <v-tabs v-model="tab">
           <v-tab v-for="(item, index) in items"
             :key="index"
-            :href="item.value">
+            :href="'#'+item.value">
             {{ item.text }}
           </v-tab>
         </v-tabs>
@@ -172,39 +172,34 @@ export default {
     },
     getData(p_uid, limit, uids) {
       this.loading = true;
+      let url;
       if (this.tab === 'home') {
-        Vue.http.post(route('facebook.auto.comment-home'), {
+        url = route('facebook.home.getPosts', {
           p_uid: p_uid,
+          type: 'page',
           limit: limit
-        }).then((response) => response.json())
-          .then((data) => {
-            this.data = data;
-            this.loading = false;
-            this.VueNotify('success', 'Lấy bài viết thành công!');
-          }, (error) => {
-            this.VueNotify('error', error.body);
-            this.loading = false;
-          });
+        });
       } else if (this.tab === 'feed') {
-        Vue.http.get(route('facebook.feed.getPosts', {
+        url = route('facebook.feed.getPosts', {
           p_uid: p_uid,
           uids: uids,
           limit: limit
-        })).then((response) => response.json())
-          .then((data) => {
-            this.data = data;
-            this.loading = false;
-            this.VueNotify('success', 'Lấy bài viết thành công!');
-          }, (error) => {
-            this.loading = false;
-            this.VueNotify('error', error.body);
-          });
+        });
       }
+      Vue.http.get(url).then(response => response.json())
+        .then(data => {
+          this.data = data;
+          this.loading = false;
+          this.VueNotify('success', 'Lấy bài viết thành công!');
+        }, error => {
+          this.loading = false;
+          this.VueNotify('error', error.body);
+        });
     },
     startComment(p_uid, tab, data, message, url_picture) {
       this.is_start = true;
       this.loading = true;
-      sleep_loop(data, [2, 5], async(value, index) => {
+      sleep_loop(data, [5, 10], async(value, index) => {
         if (this.is_start === false) {
           this.data = [];
           this.loading = false;

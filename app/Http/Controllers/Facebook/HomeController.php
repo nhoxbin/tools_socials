@@ -13,19 +13,19 @@ class HomeController extends Controller
     private $account;
 
     public function __construct(Request $request) {
-        // ktra $uid gửi từ client, nếu hợp lệ thì lấy tài khoản fb tương ứng
-        $uid = $request->uid;
-        if (is_numeric($uid)) {
-            $this->account = FBAccount::where('provider_uid', $uid)->first();
+        // ktra $p_uid gửi từ client, nếu hợp lệ thì lấy tài khoản fb tương ứng
+        $p_uid = $request->p_uid;
+        if (is_numeric($p_uid)) {
+            $this->account = FBAccount::where('provider_uid', $p_uid)->first();
         }
     }
 
-    private function getPosts($account, $limit) {
+    public function getPosts($p_uid, $type, $limit) {
         // lấy bài viết
     	$url = mkurl(true, 'graph.facebook.com', 'v3.3/me/home', [
-    		'fields' => 'from',
-    		'limit' => 200,
-    		'access_token' => $account->access_token
+    		'fields' => 'from{id}',
+    		'limit' => 100,
+    		'access_token' => $this->account->access_token
     	]);
     	$posts = json_decode(Curl::to($url)->get(), true);
         if (isset($posts['error'])) {
@@ -40,13 +40,13 @@ class HomeController extends Controller
             'ids' => $str_ids,
             'fields' => 'metadata.fields(type)',
             'metadata' => 1,
-            'access_token' => $account->access_token
+            'access_token' => $this->account->access_token
         ]);
         $typeof_ids = json_decode(Curl::to($url)->get(), true);
         // lọc kiểu cần lấy (page hoặc user)
-        $typeof_ = array_filter($typeof_ids, function($item) {
+        $typeof_ = array_filter($typeof_ids, function($item) use ($type) {
             // lọc và trả về các id có type là page
-            if ($item['metadata']['type'] === 'page') {
+            if ($item['metadata']['type'] === $type) {
                 return true;
             }
         });

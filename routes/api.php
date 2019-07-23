@@ -97,11 +97,14 @@ Route::group([
             ->where('limit', '[0-9]+')
             ->name('feed.getPosts');
 
+        // lấy bài viết trên newfeed với type là page hoặc user
+        Route::get('home/{type}/posts/{limit}', 'HomeController@getPosts')
+            ->where('limit', '[0-9]+')
+            ->name('home.getPosts');
+
         /*Route::group(['as' => 'auto.', 'prefix' => 'auto'], function() {
             // inbox
             Route::match(['GET', 'POST'], '/inbox', 'MessengerController@inbox')->name('inbox');
-            // comment
-            Route::post('/comment-home', 'HomeController@startComment')->name('comment-home');
         });*/
     });
 });
