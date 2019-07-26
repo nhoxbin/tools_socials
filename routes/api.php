@@ -87,7 +87,7 @@ Route::group([
 
         Route::resource('comment', 'CommentController', [
             'names' => 'comment',
-            'except' => ['edit', 'update', 'create', 'destroy'],
+            'only' => ['index', 'show', 'store'],
             'parameters' => ['comment' => 'type']
         ]);
         Route::delete('comment/{type}/delete/{commented_id}', 'CommentController@delete')->name('comment.delete');
