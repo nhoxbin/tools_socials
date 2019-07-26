@@ -23,7 +23,7 @@ class HomeController extends Controller
     public function getPosts($p_uid, $type, $limit) {
         // lấy bài viết
     	$url = mkurl(true, 'graph.facebook.com', 'v3.3/me/home', [
-    		'fields' => 'from{id}',
+    		'fields' => 'from',
     		'limit' => 100,
     		'access_token' => $this->account->access_token
     	]);
@@ -60,7 +60,7 @@ class HomeController extends Controller
                 array_push($posts, $item);
             }
         }
-        return array_slice($posts, 0, $limit);
+        return array_slice(array_column($posts, 'id'), 0, $limit);
     }
 
     private function comment($account, $id_post, $picture, $comment) {
