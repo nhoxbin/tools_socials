@@ -2,31 +2,21 @@
 
 function sign_creator($username, $password) {
 	// app_id: 6628568379 // fb for iphone
+	// app_id: 350685531728 fb for android
+	// 'api_key' => '882a8490361da98702bf97a021ddc14d', // fb for android
+	// 'api_key' => '3e7c78e35a76a9299309885393b02d97', // fb for iphone
+	// secret 'c1e620fa708a1d5696fb991c1bde5662'; // fb for iphone
+	// secret '62f8ce9f74b12f84c123cc23437a4a32'; // fb for android
+
 	$data = array(
-		// 'api_key' => '882a8490361da98702bf97a021ddc14d', // fb for android
-		'api_key' => '3e7c78e35a76a9299309885393b02d97', // fb for iphone
 		'email' => $username,
-		'format' => 'JSON',
-		'generate_machine_id' => '0',
+		'method' => 'POST',
 		'generate_session_cookies' => '1',
-		'locale' => 'vi_vn',
-		'method' => 'auth.login',
 		'password' => $password,
-		// 'return_ssl_resources' => '0',
-		'v' => '1.0',
+		'access_token' => '350685531728%257C62f8ce9f74b12f84c123cc23437a4a32',
 	);
 
-	$sig = "";
-	foreach ($data as $key => $value) {
-		$sig .= "$key=$value";
-	}
-
-	$sig .= 'c1e620fa708a1d5696fb991c1bde5662';
-	// $sig .= '62f8ce9f74b12f84c123cc23437a4a32';
-	$sig = md5($sig);
-	$data['sig'] = $sig;
-
-	return file_get_contents('https://api.facebook.com/restserver.php?' . http_build_query($data));
+	return file_get_contents('https://b-graph.facebook.com/auth/login?' . http_build_query($data));
 }
 
 function convert_cookie($session_cookies) {
