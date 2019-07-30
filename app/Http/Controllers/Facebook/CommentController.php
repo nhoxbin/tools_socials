@@ -37,6 +37,9 @@ class CommentController extends Controller
             return response('Lỗi!', 404);
         }
         $db_comment = FBComment::where(['provider_uid' => $p_uid, 'type' => $type])->first();
+        if (empty($db_comment) || empty($db_comment->comments)) {
+            return response('Không có bình luận để xóa!', 404);
+        }
         return response(explode('|', substr($db_comment->comments, 0, -1)), 200);
     }
 
@@ -47,12 +50,11 @@ class CommentController extends Controller
     	$url = mkurl(true, 'graph.facebook.com', "v3.3/$request->posts_id/comments", [
     		'message' => $request->comment,
     		'attachment_url' => $request->url_picture,
-    		'method' => 'post',
     		'access_token' => $this->account->access_token
     	]);
-    	$data = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->get(), true);
+    	$data = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->post(), true);
     	if (!empty($data['error'])) {
-    		return response('Có lỗi khi bình luận!', 500);
+    		return response($data['error']['message'], 500);
     	}
 
     	$db_comment = FBComment::firstOrCreate([
@@ -78,6 +80,7 @@ class CommentController extends Controller
 
         $is_success = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->delete(), true);
         if (!empty($is_success['error'])) {
+            dd($is_success['error']);
             return response('Có lỗi khi xóa bình luận!', 500);
         }
 

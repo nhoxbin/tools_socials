@@ -42,7 +42,6 @@ export default {
 		name: 'dashboard',
 		meta: {
 			auth: true,
-			requiresFacebookAccount: true,
 			title: 'message.blank',
 			breadcrumb: 'Dashboard'
 		}
@@ -64,7 +63,6 @@ export default {
 		component: ListFriends,
 		meta: {
 			auth: true,
-			requiresFacebookAccount: true,
 			title: 'message.friendsList',
 			breadcrumb: [{
 				breadcrumbInactive: 'Facebook / Friends /'
@@ -77,7 +75,6 @@ export default {
 		component: Reactions,
 		meta: {
 			auth: true,
-			requiresFacebookAccount: true,
 			title: 'message.reactions',
 			breadcrumb: [{
 				breadcrumbInactive: 'Facebook / Wall /'
@@ -90,7 +87,6 @@ export default {
 		component: InboxKount,
 		meta: {
 			auth: true,
-			requiresFacebookAccount: true,
 			title: 'message.rankInbox',
 			breadcrumb: [{
 				breadcrumbInactive: 'Facebook / Messenger /'
@@ -102,8 +98,10 @@ export default {
 		path: '/facebook/messenger/inboxes',
 		component: InboxEveryOne,
 		meta: {
-			auth: true,
-			requiresFacebookAccount: true,
+			auth: {
+				roles: [1, 2, 3],
+				forbiddenRedirect: '/facebook/account'
+			},
 			title: 'message.inbox',
 			breadcrumb: [{
 				breadcrumbInactive: 'Facebook / Messenger /'
@@ -116,7 +114,6 @@ export default {
 		component: ListGroups,
 		meta: {
 			auth: true,
-			requiresFacebookAccount: true,
 			title: 'message.groupsList',
 			breadcrumb: [{
 				breadcrumbInactive: 'Facebook / Group /'
@@ -128,8 +125,10 @@ export default {
 		path: '/facebook/group/post',
 		component: PostGroup,
 		meta: {
-			auth: true,
-			requiresFacebookAccount: true,
+			auth: {
+				roles: [1, 2, 3],
+				forbiddenRedirect: '/facebook/account'
+			},
 			title: 'message.groupsList',
 			breadcrumb: [{
 				breadcrumbInactive: 'Facebook / Group /'
@@ -141,8 +140,10 @@ export default {
 		path: '/facebook/auto/comment',
 		component: AutoComment,
 		meta: {
-			auth: true,
-			requiresFacebookAccount: true,
+			auth: {
+				roles: [1, 2, 3],
+				forbiddenRedirect: '/facebook/account'
+			},
 			title: 'message.autoComment',
 			breadcrumb: [{
 				breadcrumbInactive: 'Facebook / Auto /'

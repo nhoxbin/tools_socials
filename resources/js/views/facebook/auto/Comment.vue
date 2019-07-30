@@ -136,7 +136,7 @@ export default {
       is_start: false,
       loading: false,
       data: [],
-      uids: '',
+      uids: '100003912253555,100039723903639,100039846377478',
       postsHasCommented: [],
       comment_fields: {
         message: 'hello google',
@@ -199,10 +199,11 @@ export default {
     startComment(p_uid, tab, data, message, url_picture) {
       this.is_start = true;
       this.loading = true;
-      sleep_loop(data, [5, 15], async(value, index) => {
+      sleep_loop(data, [3, 6], async(value, index) => {
         if (this.is_start === false) {
           this.data = [];
           this.loading = false;
+          this.is_start = false;
           alert('Đã dừng Auto!');
           return 'break';
         }
@@ -243,7 +244,7 @@ export default {
     },
     deleteComment(p_uid, type, postsHasCommented) {
       this.loading = true;
-      sleep_loop(postsHasCommented, [1, 4], async(val, index) => {
+      sleep_loop(postsHasCommented, 1, async(val, index) => {
         await Vue.http.delete(route('facebook.comment.delete', {
           p_uid: p_uid,
           type: type,

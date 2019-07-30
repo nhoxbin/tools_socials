@@ -46,9 +46,8 @@ Route::group([
         ->middleware('checkRole') // memberCannotLoginFBTwice
         ->name('login');
 
-    Route::get('account', 'AccountController@show')->name('account.show');
-    Route::post('/account/update', 'AccountController@update')->name('account.update');
-    // Route::resource('account', 'AccountController', ['only' => ['show', 'update']]);
+    Route::get('account', 'AccountController@index')->name('account.index');
+    Route::get('account/update', 'AccountController@update')->name('account.update');
 
     Route::group([
         'prefix' => '{p_uid}',

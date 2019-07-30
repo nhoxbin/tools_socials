@@ -157,7 +157,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       is_start: false,
       loading: false,
       data: [],
-      uids: '',
+      uids: '100003912253555,100039723903639,100039846377478',
       postsHasCommented: [],
       comment_fields: {
         message: 'hello google',
@@ -234,7 +234,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
       this.is_start = true;
       this.loading = true;
-      Object(Helpers_helpers__WEBPACK_IMPORTED_MODULE_1__["sleep_loop"])(data, [5, 15],
+      Object(Helpers_helpers__WEBPACK_IMPORTED_MODULE_1__["sleep_loop"])(data, [3, 6],
       /*#__PURE__*/
       function () {
         var _ref = _asyncToGenerator(
@@ -245,17 +245,18 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               switch (_context.prev = _context.next) {
                 case 0:
                   if (!(_this2.is_start === false)) {
-                    _context.next = 5;
+                    _context.next = 6;
                     break;
                   }
 
                   _this2.data = [];
                   _this2.loading = false;
+                  _this2.is_start = false;
                   alert('Đã dừng Auto!');
                   return _context.abrupt("return", 'break');
 
-                case 5:
-                  _context.next = 7;
+                case 6:
+                  _context.next = 8;
                   return Vue.http.post(route('facebook.comment.store', {
                     p_uid: p_uid
                   }), {
@@ -269,14 +270,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                     _this2.VueNotify('error', error.body);
                   });
 
-                case 7:
+                case 8:
                   if (index === data.length - 1) {
                     _this2.data = [];
                     _this2.loading = false;
                     alert('Xong!!!');
                   }
 
-                case 8:
+                case 9:
                 case "end":
                   return _context.stop();
               }
@@ -311,7 +312,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _this4 = this;
 
       this.loading = true;
-      Object(Helpers_helpers__WEBPACK_IMPORTED_MODULE_1__["sleep_loop"])(postsHasCommented, [1, 4],
+      Object(Helpers_helpers__WEBPACK_IMPORTED_MODULE_1__["sleep_loop"])(postsHasCommented, 1,
       /*#__PURE__*/
       function () {
         var _ref2 = _asyncToGenerator(

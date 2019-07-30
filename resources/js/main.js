@@ -42,20 +42,7 @@ import './lib/VuelyCss'
 
 router.beforeEach((to, from, next) => {
 	Nprogress.start()
-	if (to.matched.some(record => record.meta.requiresFacebookAccount)) {
-		if (localStorage.getItem('FacebookAccount') === null) {
-			next({
-				path: '/facebook/account',
-				query: {
-					redirect: to.fullPath
-				}
-			})
-		} else {
-			next()
-		}
-	} else {
-		next()
-	}
+	next();
 })
 
 router.afterEach((from, next) => {

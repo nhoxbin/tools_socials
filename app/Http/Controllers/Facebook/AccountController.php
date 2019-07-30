@@ -10,11 +10,12 @@ use Curl;
 
 class AccountController extends Controller
 {
-    public function index() {
-        return response(FBAccount::all(), 200);
+    public function show($provider_uid) {
+        $account = FBAccount::where('provider_uid', $provider_uid)->first();
+        return response($account, 200);
     }
 
-    public function show() {
+    public function index() {
         $accounts = FBAccount::where('user_id', auth()->id())
             ->select('provider_uid', 'name', 'is_active', 'status', 'user_id')
             ->get();
@@ -49,13 +50,13 @@ class AccountController extends Controller
 
         $username = $request->username;
         $password = $request->password;
-        $data_user = json_decode(sign_creator($username, $password), true);
+        $data_user = sign_creator($username, $password);
         if ($err_msg = HandleLogin($data_user)) {
             return response($err_msg, 422);
         }
         
         // $data_user trả về kết quả và lấy thông tin người dùng
-        $p_uid = $data_user['session_cookies'][0]['value'];
+        $p_uid = $data_user['uid'];
         $access_token = $data_user['access_token'];
         $cookie = convert_cookie($data_user['session_cookies']);
         

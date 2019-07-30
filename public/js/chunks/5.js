@@ -112,20 +112,22 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     account: 'facebookAccount',
     has_account: 'checkFacebookAccount'
   }), {
-    member: function member() {
-      if (this.$auth.user().role === 'Member') {
+    isMember: function isMember() {
+      if (this.$auth.user().role.name === 'Member') {
         return true;
-      }
-    },
-    status: function status() {
-      if (this.has_account && this.member) {
-        if (this.$auth.user().facebook[0].is_active === 0) {
-          return true;
-        }
+      } else {
+        return false;
       }
     }
   }),
   methods: {
+    VueNotify: function VueNotify(type, message) {
+      Vue.notify({
+        group: 'app',
+        type: type,
+        text: message
+      });
+    },
     submit: function submit() {
       if (this.$refs.form.validate()) {
         this.loader = true;
@@ -143,21 +145,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         password: this.account_form.password
       };
       Vue.http.post(route('facebook.login'), account).then(function (response) {
-        Vue.http.get(route('facebook.account.show')).then(function (resp) {
-          localStorage.setItem('FacebookAccount', JSON.stringify(resp.body));
+        Vue.http.get(route('facebook.account.index')).then(function (resp) {
           _this.$auth.user().facebook = resp.body;
-        });
-        Vue.notify({
-          group: 'app',
-          type: 'success',
-          text: response.body
+
+          _this.VueNotify('success', response.body);
         });
       }, function (error) {
-        Vue.notify({
-          group: 'app',
-          type: 'error',
-          text: error.body
-        });
+        _this.VueNotify('error', error.body);
       }).then(function () {
         _this.loader = false;
       });
@@ -166,17 +160,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var _this2 = this;
 
       this.loading = true;
-      Vue.http.post(route('facebook.account.update')).then(function (response) {
-        Vue.notify({
-          group: 'app',
-          type: 'success',
-          text: response.body
+      Vue.http.get(route('facebook.account.update')).then(function (resp) {
+        Vue.http.get(route('facebook.account.index')).then(function (response) {
+          _this2.$auth.user().facebook = response.body;
+          _this2.loading = false;
+
+          _this2.VueNotify('success', resp.body);
         });
-      });
-      Vue.http.get(route('facebook.account.show')).then(function (response) {
-        localStorage.setItem('FacebookAccount', JSON.stringify(response.body));
-        _this2.$auth.user().facebook = response.body;
-        _this2.loading = false;
       });
     }
   }
@@ -214,7 +204,7 @@ var render = function() {
                 "v-container",
                 { attrs: { fluid: "", "grid-list-xl": "", "py-0": "" } },
                 [
-                  !_vm.has_account || !_vm.member || _vm.status
+                  !_vm.has_account || !_vm.isMember
                     ? _c(
                         "app-card",
                         {

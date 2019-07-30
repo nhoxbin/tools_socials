@@ -5,7 +5,7 @@
 
   <div v-if="loader == false">
     <v-container fluid grid-list-xl py-0>
-      <app-card v-if="!has_account || !member || status"
+      <app-card v-if="!has_account || !isMember"
         :heading="$t('message.infoToLoginFB')"
         customClasses="mb-30">
         <v-form v-model="account_form.valid" ref="form" lazy-validation>
@@ -87,20 +87,22 @@ export default {
       account: 'facebookAccount',
       has_account: 'checkFacebookAccount'
     }),
-    member() {
-      if (this.$auth.user().role === 'Member') {
+    isMember() {
+      if (this.$auth.user().role.name === 'Member') {
         return true;
-      }
-    },
-    status() {
-      if (this.has_account && this.member) {
-        if (this.$auth.user().facebook[0].is_active === 0) {
-          return true;
-        }
+      } else {
+        return false;
       }
     }
   },
   methods: {
+    VueNotify(type, message) {
+      Vue.notify({
+        group: 'app',
+        type: type,
+        text: message
+      });
+    },
     submit() {
       if (this.$refs.form.validate()) {
         this.loader = true;
@@ -117,42 +119,28 @@ export default {
       }
       
       Vue.http.post(route('facebook.login'), account)
-        .then((response) => {
-          Vue.http.get(route('facebook.account.show'))
+        .then(response => {
+          Vue.http.get(route('facebook.account.index'))
             .then(resp => {
-              localStorage.setItem('FacebookAccount', JSON.stringify(resp.body));
               this.$auth.user().facebook = resp.body;
+              this.VueNotify('success', response.body)
             });
-          Vue.notify({
-            group: 'app',
-            type: 'success',
-            text: response.body
-          });
-        }, (error) => {
-          Vue.notify({
-            group: 'app',
-            type: 'error',
-            text: error.body
-          });
+        }, error => {
+          this.VueNotify('error', error.body)
         }).then(() => {
           this.loader = false;
         });
     },
     updateAccountFacebook: function() {
       this.loading = true;
-      Vue.http.post(route('facebook.account.update'))
-        .then((response) => {
-          Vue.notify({
-            group: 'app',
-            type: 'success',
-            text: response.body
-          });
-        });
-      Vue.http.get(route('facebook.account.show'))
-        .then(response => {
-          localStorage.setItem('FacebookAccount', JSON.stringify(response.body));
-          this.$auth.user().facebook = response.body;
-          this.loading = false;
+      Vue.http.get(route('facebook.account.update'))
+        .then(resp => {
+          Vue.http.get(route('facebook.account.index'))
+            .then(response => {
+              this.$auth.user().facebook = response.body;
+              this.loading = false;
+              this.VueNotify('success', resp.body)
+            });
         });
     }
   }

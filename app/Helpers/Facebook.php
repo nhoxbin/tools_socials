@@ -13,10 +13,16 @@ function sign_creator($username, $password) {
 		'method' => 'POST',
 		'generate_session_cookies' => '1',
 		'password' => $password,
-		'access_token' => '350685531728%257C62f8ce9f74b12f84c123cc23437a4a32',
+		'access_token' => '350685531728|62f8ce9f74b12f84c123cc23437a4a32',
 	);
 
-	return file_get_contents('https://b-graph.facebook.com/auth/login?' . http_build_query($data));
+	$ch = curl_init('https://b-graph.facebook.com/auth/login?' . http_build_query($data));
+	curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $data = json_decode(curl_exec($ch), true);
+    curl_close($ch);
+
+    return $data;
 }
 
 function convert_cookie($session_cookies) {
@@ -28,17 +34,17 @@ function convert_cookie($session_cookies) {
 }
 
 function HandleLogin($array) {
-	if (!isset($array['error_data'])) {
+	if (!isset($array['error'])) {
 		return false;
 	}
-	$code = $array['error_code'];
-	$data = json_decode($array['error_data'], true);
+	$error = $array['error'];
+	$code = $error['code'];
 	$message;
 	switch ($code) {
 		case 400: case 401: case 405:
 			#401 "Invalid username or password"
 			#405 "Checkpoint"
-			$message = $data['error_message'];
+			$message = $error['error_user_msg'];
 			break;
 		default:
 			$message = 'Có lỗi xảy ra! Vui lòng liên hệ BQT để sửa lỗi. Xin cảm ơn!';
