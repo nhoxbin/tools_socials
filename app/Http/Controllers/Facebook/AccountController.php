@@ -10,7 +10,7 @@ use Curl;
 
 class AccountController extends Controller
 {
-    public function show($provider_uid) {
+    public function show($p_uid) {
         $account = FBAccount::where('provider_uid', $provider_uid)->first();
         return response($account, 200);
     }
@@ -87,6 +87,26 @@ class AccountController extends Controller
         if ($info->wasRecentlyCreated) {
             $status = 'Đăng nhập';
         }
+
+        $user = User::find($user_id);
+        if ($user->role_id === 0) {
+            $user->role_id = 1;
+            $user->save();
+        }
+
         return response("$status Facebook thành công!", 200);
+    }
+
+    public function destroy($p_uid) {
+        if (!is_numeric($p_uid)) {
+            return response('ID Facebook không đúng', 422);
+        }
+
+        $account = FBAccount::where('provider_uid', $p_uid)->first();
+        if ($account === null) {
+            return response('Tài khoản ko tồn tại!', 404);
+        }
+        $account->delete();
+        return response('Xóa tài khoản Facebook thành công!', 200);
     }
 }

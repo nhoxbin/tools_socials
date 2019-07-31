@@ -145,11 +145,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         password: this.account_form.password
       };
       Vue.http.post(route('facebook.login'), account).then(function (response) {
-        Vue.http.get(route('facebook.account.index')).then(function (resp) {
-          _this.$auth.user().facebook = resp.body;
+        _this.$store.dispatch('getAccountFB');
 
-          _this.VueNotify('success', response.body);
-        });
+        _this.VueNotify('success', response.body);
       }, function (error) {
         _this.VueNotify('error', error.body);
       }).then(function () {
@@ -161,12 +159,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       this.loading = true;
       Vue.http.get(route('facebook.account.update')).then(function (resp) {
-        Vue.http.get(route('facebook.account.index')).then(function (response) {
-          _this2.$auth.user().facebook = response.body;
-          _this2.loading = false;
+        _this2.$store.dispatch('getAccountFB');
 
-          _this2.VueNotify('success', resp.body);
-        });
+        _this2.loading = false;
+
+        _this2.VueNotify('success', resp.body);
       });
     }
   }

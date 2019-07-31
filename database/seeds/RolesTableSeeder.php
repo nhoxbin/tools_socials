@@ -12,21 +12,21 @@ class RolesTableSeeder extends Seeder
      */
     public function run()
     {
-        Role::insert([
-        	'id' => 0,
-        	'name' => 'Member'
-        ]);
-        Role::insert([
+        Role::insert([[
+            'id' => 0,
+            'name' => 'Undefined'
+        ], [
         	'id' => 1,
-        	'name' => 'Vip Member'
-        ]);
-        Role::insert([
-        	'id' => 2,
-        	'name' => 'Admin'
-        ]);
-        Role::insert([
-        	'id' => 3,
-        	'name' => 'Super Admin'
-        ]);
+        	'name' => 'Member'
+        ], [
+            'id' => 2,
+            'name' => 'Vip Member'
+        ], [
+            'id' => 3,
+            'name' => 'Admin'
+        ], [
+            'id' => 4,
+            'name' => 'Super Admin'
+        ]]);
     }
 }

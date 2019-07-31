@@ -11,7 +11,7 @@
 			<v-content>
 				<!-- App Router -->
 				<transition name="router-anim" :enter-active-class="`animated ${selectedRouterAnimation}`">
-					<router-view v-if="$auth.check()"></router-view>
+					<router-view v-if="$auth.check() && $auth.ready()"></router-view>
 				</transition>
 			</v-content>
 		</template>

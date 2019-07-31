@@ -14,7 +14,7 @@ const getters = {
 
 const actions = {
 	getAccountFB(context) {
-		Vue.http.get(route('facebook.account.show'))
+		Vue.http.get(route('facebook.account.index'))
 			.then((response) => {
 				if (response.body.length > 0) {
 					context.commit('storeAccount', response.body);

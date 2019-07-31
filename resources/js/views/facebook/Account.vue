@@ -120,11 +120,8 @@ export default {
       
       Vue.http.post(route('facebook.login'), account)
         .then(response => {
-          Vue.http.get(route('facebook.account.index'))
-            .then(resp => {
-              this.$auth.user().facebook = resp.body;
-              this.VueNotify('success', response.body)
-            });
+          this.$store.dispatch('getAccountFB');
+          this.VueNotify('success', response.body)
         }, error => {
           this.VueNotify('error', error.body)
         }).then(() => {
@@ -135,12 +132,9 @@ export default {
       this.loading = true;
       Vue.http.get(route('facebook.account.update'))
         .then(resp => {
-          Vue.http.get(route('facebook.account.index'))
-            .then(response => {
-              this.$auth.user().facebook = response.body;
-              this.loading = false;
-              this.VueNotify('success', resp.body)
-            });
+          this.$store.dispatch('getAccountFB');
+          this.loading = false;
+          this.VueNotify('success', resp.body)
         });
     }
   }
