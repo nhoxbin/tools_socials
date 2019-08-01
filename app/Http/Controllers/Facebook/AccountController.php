@@ -54,9 +54,9 @@ class AccountController extends Controller
         if ($err_msg = HandleLogin($data_user)) {
             return response($err_msg, 422);
         }
-        
+
         // $data_user trả về kết quả và lấy thông tin người dùng
-        $p_uid = $data_user['uid'];
+        $p_uid = $data_user['session_cookies'][0]['value'];
         $access_token = $data_user['access_token'];
         $cookie = convert_cookie($data_user['session_cookies']);
         
