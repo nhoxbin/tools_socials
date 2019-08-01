@@ -23,13 +23,14 @@ class FeedController extends Controller
     	if (empty($this->account)) {
 			return response('Không tìm thấy tài khoản Facebook!', 404);
 		}
-		if (is_numeric($limit) && ($limit*2 < 5 || $limit*2 > 100)) {
-			return response('Lấy từ 5 > 100 bài viết!', 500);
+		if (is_numeric($limit) && ($limit*2 < 4 || $limit*2 > 100)) {
+			return response('Lấy từ 4 > 100 bài viết!', 500);
 		}
 
-    	$url = mkurl(true, 'graph.facebook.com', 'v3.3', [
+    	$url = mkurl(true, 'graph.facebook.com', 'feed', [
     		'ids' => $uids,
-    		'fields' => "feed.limit($limit){id}",
+    		'fields' => 'id',
+    		'limit' => $limit,
 			'access_token' => $this->account->access_token
 		]);
     	$data = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->get(), true);
@@ -39,7 +40,7 @@ class FeedController extends Controller
 
     	$posts = [];
     	foreach ($data as $id => $value) {
-    		$user_posts = array_column($value['feed']['data'], 'id');
+    		$user_posts = array_column($value['data'], 'id');
     		foreach ($user_posts as $value) {
     			array_push($posts, $value);
     		}
@@ -101,7 +102,7 @@ class FeedController extends Controller
 		if ($request->selectDateType >= 1 && $request->selectDateType <= 2) {
 			$account = FBAccount::where('user_id', auth()->id())->first();
 			$since = $request->selectDateType == 1 ? '-3 months' : '-6 months';
-			$url = mkurl(true, 'graph.facebook.com', 'v3.3/me/feed', [
+			$url = mkurl(true, 'graph.facebook.com', 'me/feed', [
 				'fields' => 'reactions{name,pic_small,link,type}',
 				'since' => strtotime($since),
 				'access_token' => $account->access_token
@@ -127,7 +128,10 @@ class FeedController extends Controller
 		}
 		$user = $user->toArray();
 		// lấy bài viết trên tường nhà
-		$url_get_feed = mkurl(true, 'graph', 'facebook.com', "v2.9/$uid/feed", ['fields' => 'id,message,name,description,link,source,story,type,full_picture,created_time,actions,privacy,comments', 'access_token' => $user['access_token']]);
+		$url_get_feed = mkurl(true, 'graph.facebook.com', "$uid/feed", [
+			'fields' => 'id,message,name,description,link,source,story,type,full_picture,created_time,actions,privacy,comments',
+			'access_token' => $user['access_token']
+		]);
 		$feed = Curl::to($url_get_feed)->get();
 		$feed_data = str_replace('\\n', '<br />', $feed);
 		$feed = json_decode($feed_data, true);
@@ -171,7 +175,7 @@ class FeedController extends Controller
 				$fields = array_merge($tmp, ['tmp' => 'tmp']);
 			}
 
-			$url_post_stt = mkurl(true, 'graph', 'facebook.com', "v2.9/$social[provider_uid]/feed", $fields);
+			$url_post_stt = mkurl(true, 'graph.facebook.com', "$social[provider_uid]/feed", $fields);
 			$feed = json_decode(Curl::to($url_post_stt)->post(), true);
 			if ($err_msg = CheckAndHandleFBErrCode($feed)) {
 				return back()->with('error', $err_msg);
@@ -198,7 +202,7 @@ class FeedController extends Controller
 		for ($i=0; $i < $count_file; $i++) {
 			if ($files[$i]->isValid()) {
 				$url_picture = upanh($files[$i]->getPathname()); // tmp name
-				$url_post_photos = mkurl(true, 'graph', 'facebook.com', "v2.9/$social[provider_uid]/photos", null);
+				$url_post_photos = mkurl(true, 'graph', 'facebook.com', "$social[provider_uid]/photos", null);
 
 				$photos[$i] = json_decode(Curl::to($url_post_photos)->withData([
 					'url' => $url_picture,
@@ -222,7 +226,9 @@ class FeedController extends Controller
 		}
 		$user = $user->toArray();
 
-		$url_del_stt = mkurl(true, 'graph', 'facebook.com', $idStatus, ['access_token' => $user['access_token']]);
+		$url_del_stt = mkurl(true, 'graph.facebook.com', $idStatus, [
+			'access_token' => $user['access_token']
+		]);
 		$delstt = json_decode(Curl::to($url_del_stt)->delete(), true);
 		if ($delstt === true) {
 			return back()->with(['success' => 'Xóa bài viết thành công !', 'del' => true]);

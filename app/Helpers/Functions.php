@@ -142,7 +142,7 @@ function array_search_multidim($array, $column, $search_value) {
 }
 
 function mkurl($is_ssl, $host, $path = null, array $fields) {
-	$url = ($is_ssl ? 'https://' : 'http://') . $host . '/' . $path;
+	$url = ($is_ssl ? 'https://' : 'http://') . $host . '/v4.0/' . $path;
 	if (!empty($fields)) {
 		$url .= '?' . http_build_query($fields);
 	}

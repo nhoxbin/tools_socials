@@ -26,7 +26,7 @@ class AccountController extends Controller
         $accounts = User::find(auth()->id())->facebook;
         foreach ($accounts as $account) {
             // get name and id of user
-            $url = mkurl(true, 'graph.facebook.com', "v3.3/$account[provider_uid]", [
+            $url = mkurl(true, 'graph.facebook.com', $account['provider_uid'], [
                 'access_token' => $account->access_token
             ]);
             $userInfo = json_decode(Curl::to($url)->get(), true);
@@ -71,7 +71,7 @@ class AccountController extends Controller
         }
 
         // Curl get name
-        $url = mkurl(true, 'graph.facebook.com', "v3.3/$p_uid", ['access_token' => $access_token]);
+        $url = mkurl(true, 'graph.facebook.com', $p_uid, ['access_token' => $access_token]);
         $user = json_decode(Curl::to($url)->get(), true);
         $info = FBAccount::updateOrCreate([
             'user_id' => $user_id,

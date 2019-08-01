@@ -22,7 +22,7 @@ class HomeController extends Controller
 
     public function getPosts($p_uid, $type, $limit) {
         // lấy bài viết
-    	$url = mkurl(true, 'graph.facebook.com', 'v3.3/me/home', [
+    	$url = mkurl(true, 'graph.facebook.com', 'me/home', [
     		'fields' => 'from',
     		'limit' => 100,
     		'access_token' => $this->account->access_token

@@ -47,7 +47,7 @@ class CommentController extends Controller
     	if (empty($this->account)) {
     		return response('Không tìm thấy tài khoản Facebook!', 404);
     	}
-    	$url = mkurl(true, 'graph.facebook.com', "v3.3/$request->posts_id/comments", [
+    	$url = mkurl(true, 'graph.facebook.com', "$request->posts_id/comments", [
     		'message' => $request->comment,
     		'attachment_url' => $request->url_picture,
     		'access_token' => $this->account->access_token
@@ -74,7 +74,7 @@ class CommentController extends Controller
         if (empty($this->account)) {
             return response('Không tìm thấy tài khoản Facebook!', 404);
         }
-        $url = mkurl(true, 'graph.facebook.com', "v3.3/$commented_id", [
+        $url = mkurl(true, 'graph.facebook.com', "$commented_id", [
             'access_token' => $this->account->access_token
         ]);
 

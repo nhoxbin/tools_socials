@@ -18,7 +18,7 @@ class FriendsController extends Controller
 	}
 
 	public function getFriendsWithId($id, $access_token) {
-		$url = mkurl(true, 'graph.facebook.com', "v2.1/$id/friends", [
+		$url = mkurl(true, 'graph.facebook.com', "$id/friends", [
 			'fields' => 'name,link,picture.width(30).height(30),mobile_phone,birthday,hometown,location',
 			'limit' => '5000',
 			'pretty' => 0,
@@ -53,10 +53,9 @@ class FriendsController extends Controller
 
 		$url = mkurl(true, 'graph.facebook.com', "$account[provider_uid]/friends", [
 			'uid' => $uid,
-			'method' => 'delete',
 			'access_token' => $access_token
 		]);
-		$status = json_decode(Curl::to($url)->get(), true);
+		$status = json_decode(Curl::to($url)->delete(), true);
 		if ($status['success']) {
 			return response('Hủy kết bạn thành công.', 200);
 		}
