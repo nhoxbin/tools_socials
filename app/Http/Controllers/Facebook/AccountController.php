@@ -11,7 +11,7 @@ use Curl;
 class AccountController extends Controller
 {
     public function show($p_uid) {
-        $account = FBAccount::where('provider_uid', $provider_uid)->first();
+        $account = FBAccount::where('provider_uid', $p_uid)->first();
         return response($account, 200);
     }
 
