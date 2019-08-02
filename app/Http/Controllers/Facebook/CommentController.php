@@ -80,7 +80,6 @@ class CommentController extends Controller
 
         $is_success = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->delete(), true);
         if (!empty($is_success['error'])) {
-            dd($is_success['error']);
             return response('Có lỗi khi xóa bình luận!', 500);
         }
 

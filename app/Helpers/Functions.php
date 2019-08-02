@@ -142,7 +142,10 @@ function array_search_multidim($array, $column, $search_value) {
 }
 
 function mkurl($is_ssl, $host, $path = null, array $fields) {
-	$url = ($is_ssl ? 'https://' : 'http://') . $host . '/v4.0/' . $path;
+	if ($host === 'graph.facebook.com') {
+		$v = '/v4.0/';
+	}
+	$url = ($is_ssl ? 'https://' : 'http://') . $host . $v . $path;
 	if (!empty($fields)) {
 		$url .= '?' . http_build_query($fields);
 	}

@@ -186,7 +186,7 @@ export default {
           limit: limit
         });
       }
-      Vue.http.get(url).then(response => response.json())
+      Vue.http.get(url).then(res => res.json())
         .then(data => {
           this.data = data;
           this.loading = false;
@@ -199,7 +199,7 @@ export default {
     startComment(p_uid, tab, data, message, url_picture) {
       this.is_start = true;
       this.loading = true;
-      sleep_loop(data, [3, 6], async(value, index) => {
+      sleep_loop(data, [5, 15], async(value, index) => {
         if (this.is_start === false) {
           this.data = [];
           this.loading = false;
@@ -224,6 +224,7 @@ export default {
         if (index === data.length-1) {
           this.data = [];
           this.loading = false;
+          this.is_start = false;
           alert('Xong!!!');
         }
       });
