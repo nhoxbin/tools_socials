@@ -101,17 +101,17 @@
                 <v-spacer></v-spacer>
                 
               <v-flex md4 sm6 xs12>
-                <v-btn v-if="postsHasCommented.length === 0"
+                <v-btn v-if="commented_id.length === 0"
                   color="warning"
                   :loading="loading"
                   :disabled="loading"
-                  @click="getPostsHasCommented(selectedId, tab)">Lấy các bài viết đã Comment
+                  @click="getCommentedId(selectedId, tab)">Lấy các bài viết đã Comment
                 </v-btn>
                 <v-btn v-else
                   color="error"
                   :loading="loading"
                   :disabled="loading"
-                  @click="deleteComment(selectedId, tab,  postsHasCommented)">Xóa
+                  @click="deleteComment(selectedId, tab, commented_id)">Xóa
                 </v-btn>
               </v-flex>
             </v-layout>
@@ -136,8 +136,8 @@ export default {
       is_start: false,
       loading: false,
       data: [],
-      uids: '100003912253555,100039723903639,100039846377478',
-      postsHasCommented: [],
+      uids: '',
+      commented_id: [],
       comment_fields: {
         message: 'hello google',
         url_picture: 'https://vnreview.vn/image/18/17/65/1817650.jpg',
@@ -229,23 +229,23 @@ export default {
         }
       });
     },
-    getPostsHasCommented(p_uid, type) {
+    getCommentedId(p_uid, type) {
       this.loading = true;
       Vue.http.get(route('facebook.comment.show', {
         p_uid: p_uid,
         type: type
       })).then(response => {
-          this.postsHasCommented = response.body;
+          this.commented_id = response.body;
           this.loading = false;
-          this.VueNotify('success', 'Lấy thành công.');
+          this.VueNotify('success', 'Lấy thành công ' + response.body.length + ' bình luận.');
         }, error => {
           this.loading = false;
           this.VueNotify('error', error.body);
         });
     },
-    deleteComment(p_uid, type, postsHasCommented) {
+    deleteComment(p_uid, type, commented_id) {
       this.loading = true;
-      sleep_loop(postsHasCommented, 1, async(val, index) => {
+      sleep_loop(commented_id, 1, async(val, index) => {
         await Vue.http.delete(route('facebook.comment.delete', {
           p_uid: p_uid,
           type: type,
@@ -256,8 +256,8 @@ export default {
             this.VueNotify('error', error.body);
           });
 
-        if (index === postsHasCommented.length-1) {
-          this.postsHasCommented = [];
+        if (index === commented_id.length-1) {
+          this.commented_id = [];
           this.loading = false;
           alert('Xong!!!');
         }

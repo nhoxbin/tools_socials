@@ -56,6 +56,9 @@ class CommentController extends Controller
     	if (!empty($data['error'])) {
     		return response($data['error']['message'], 500);
     	}
+        if (empty($data['id'])) {
+            return response('Không có ID bình luận', 404);
+        }
 
     	$db_comment = FBComment::firstOrCreate([
     		'provider_uid' => $p_uid,
@@ -80,7 +83,11 @@ class CommentController extends Controller
 
         $is_success = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->delete(), true);
         if (!empty($is_success['error'])) {
-            return response('Có lỗi khi xóa bình luận!', 500);
+            if ($is_success['error']['code'] !== 200 &&
+                ($is_success['error']['code'] !== 100 &&
+                    $is_success['error']['code']['error_subcode'] !== 33)) {
+                return response('Có lỗi khi xóa bình luận!', 500);
+            }
         }
 
         $db_comment = FBComment::where(['provider_uid' => $p_uid, 'type' => $type])->first();
