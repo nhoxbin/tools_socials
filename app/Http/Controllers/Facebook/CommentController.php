@@ -10,29 +10,12 @@ use Curl;
 
 class CommentController extends Controller
 {
-	private $account;
-
-	public function __construct(Request $request) {
-		$p_uid = $request->p_uid;
-		if (is_numeric($p_uid)) {
-			$this->account = FBAccount::where('provider_uid', $p_uid)->first();
-		}
-	}
-
     public function index($p_uid) {
-        if (empty($this->account)) {
-            return response('Không tìm thấy tài khoản Facebook!', 404);
-        }
-
         $db_comment = FBComment::where('provider_uid', $p_uid)->get();
         return response(explode('|', substr($db_comment->comments, 0, -1)), 200);
     }
 
     public function show($p_uid, $type) {
-        if (empty($this->account)) {
-            return response('Không tìm thấy tài khoản Facebook!', 404);
-        }
-
         if ($type !== 'feed' && $type !== 'home') {
             return response('Lỗi!', 404);
         }
@@ -44,13 +27,10 @@ class CommentController extends Controller
     }
 
     public function store(Request $request, $p_uid) {
-    	if (empty($this->account)) {
-    		return response('Không tìm thấy tài khoản Facebook!', 404);
-    	}
     	$url = mkurl(true, 'graph.facebook.com', "$request->posts_id/comments", [
     		'message' => $request->comment,
     		'attachment_url' => $request->url_picture,
-    		'access_token' => $this->account->access_token
+    		'access_token' => $request->account['access_token']
     	]);
     	$data = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->post(), true);
     	if (!empty($data['error'])) {
@@ -74,11 +54,8 @@ class CommentController extends Controller
     }
 
     public function delete($p_uid, $type, $commented_id) {
-        if (empty($this->account)) {
-            return response('Không tìm thấy tài khoản Facebook!', 404);
-        }
         $url = mkurl(true, 'graph.facebook.com', "$commented_id", [
-            'access_token' => $this->account->access_token
+            'access_token' => $request->account['access_token']
         ]);
 
         $is_success = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->delete(), true);

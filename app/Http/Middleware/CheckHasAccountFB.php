@@ -16,9 +16,14 @@ class CheckHasAccountFB
      */
     public function handle($request, Closure $next)
     {
-        $user = User::with('facebook')->where('id', auth()->id())->first();
-        if (!empty($user['facebook'])) {
-            return $next($request);
+        $user = User::find(auth()->id())->facebook->toArray();
+        if (!empty($user)) {
+            $aProvider_uid = array_column($user, 'provider_uid');
+            if ($pos = array_search($request->p_uid, $aProvider_uid)) {
+                $request->request->add(['account' => $user[$pos]]);
+                return $next($request);
+            }
+            return response('Không tìm thấy tài khoản Facebook', 500);
         }
         return response('Bạn chưa có tài khoản Facebook', 403);
     }

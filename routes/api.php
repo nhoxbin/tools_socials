@@ -58,6 +58,7 @@ Route::group([
         'middleware' => 'hasAccountFB',
         'where' => ['p_uid' => '[0-9]+']
     ], function() {
+        // Route::get('/', 'TestController@test');
         /*Route::group(['as' => 'feed.', 'prefix' => 'feed'], function() {
             Route::post('reactions', 'FeedController@reactions')->name('reactions');
         });
@@ -68,24 +69,13 @@ Route::group([
         });
 
         Route::group(['as' => 'messenger.', 'prefix' => 'messenger'], function() {
+            Route::match(['GET', 'POST'], '/inbox', 'MessengerController@inbox')->name('inbox');
             Route::get('/inbox-kount', 'MessengerController@kount')->name('inbox-kount');
         });
 
         Route::group(['as' => 'groups.', 'prefix' => 'groups'], function() {
             Route::get('/list', 'GroupsController@getList')->name('list');
             Route::post('/out', 'GroupsController@out')->name('out');
-        });*/
-
-        /*Route::group(['as' => 'get.'], function() {
-            
-
-            // Route::get('comment/{type}', 'CommentController@show')->name('getPostsHasCommented');
-            Route::post('/{posts_id}/comment', 'CommentController@create')->name('comment');
-
-            // xóa comment
-            Route::post('/comment/{type}/{comment_id}/delete', 'CommentController@delete')
-                ->where('comment_id', '[0-9]+')
-                ->name('delete.comment');
         });*/
 
         Route::resource('comment', 'CommentController', [
@@ -104,16 +94,11 @@ Route::group([
         Route::get('home/{type}/posts/{limit}', 'HomeController@getPosts')
             ->where('limit', '[0-9]+')
             ->name('home.getPosts');
-
-        /*Route::group(['as' => 'auto.', 'prefix' => 'auto'], function() {
-            // inbox
-            Route::match(['GET', 'POST'], '/inbox', 'MessengerController@inbox')->name('inbox');
-        });*/
     });
 });
 
-Route::get('test', 'TestController@test');
+// Route::get('test', 'TestController@test');
 
 Route::any('/{any}', function() {
-    return response('404 Not found!', 404);
+    return response('404 API Not found!', 404);
 })->where('any', '.*');

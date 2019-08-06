@@ -10,19 +10,7 @@ use Session;
 
 class FeedController extends Controller
 {
-	private $account;
-
-	public function __construct(Request $request) {
-		$p_uid = $request->p_uid;
-		if (is_numeric($p_uid)) {
-			$this->account = FBAccount::where('provider_uid', $p_uid)->first();
-		}
-	}
-
-	public function getPosts($p_uid, $uids, $limit) {
-    	if (empty($this->account)) {
-			return response('Không tìm thấy tài khoản Facebook!', 404);
-		}
+	public function getPosts(Request $request, $p_uid, $uids, $limit) {
 		if (is_numeric($limit) && ($limit*2 < 4 || $limit*2 > 100)) {
 			return response('Lấy từ 4 > 100 bài viết!', 500);
 		}
@@ -31,7 +19,7 @@ class FeedController extends Controller
     		'ids' => $uids,
     		'fields' => 'id',
     		'limit' => $limit,
-			'access_token' => $this->account->access_token
+			'access_token' => $request->account['access_token']
 		]);
     	$data = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->get(), true);
     	if (!empty($data['error'])) {
