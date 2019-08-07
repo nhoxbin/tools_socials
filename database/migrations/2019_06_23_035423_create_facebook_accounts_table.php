@@ -18,7 +18,7 @@ class CreateFacebookAccountsTable extends Migration
             $table->string('name', 100)->nullable();
             $table->text('access_token', 255)->nullable();
             $table->text('cookie', 100)->nullable();
-            $table->unsignedTinyInteger('is_active');
+            $table->boolean('is_active');
             $table->string('status')->nullable();
             $table->unsignedInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');

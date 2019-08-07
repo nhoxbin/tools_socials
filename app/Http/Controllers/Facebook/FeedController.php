@@ -11,8 +11,8 @@ use Session;
 class FeedController extends Controller
 {
 	public function getPosts(Request $request, $p_uid, $uids, $limit) {
-		if (is_numeric($limit) && ($limit*2 < 4 || $limit*2 > 100)) {
-			return response('Lấy từ 4 > 100 bài viết!', 500);
+		if (!is_numeric($limit)) {
+			return response('Sai định dạng giới hạn bài viết!', 422);
 		}
 
     	$url = mkurl(true, 'graph.facebook.com', 'feed', [

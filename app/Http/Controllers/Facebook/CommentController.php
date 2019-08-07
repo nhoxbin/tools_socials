@@ -37,7 +37,7 @@ class CommentController extends Controller
     		return response($data['error']['message'], 500);
     	}
         if (empty($data['id'])) {
-            return response('Không có ID bình luận', 404);
+            return response('Đã bình luận nhưng không có ID!', 404);
         }
 
     	$db_comment = FBComment::firstOrCreate([
@@ -53,16 +53,15 @@ class CommentController extends Controller
     	return response('Bình luận thành công!', 200);
     }
 
-    public function delete($p_uid, $type, $commented_id) {
+    public function delete(Request $request, $p_uid, $type, $commented_id) {
         $url = mkurl(true, 'graph.facebook.com', "$commented_id", [
             'access_token' => $request->account['access_token']
         ]);
 
         $is_success = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->delete(), true);
         if (!empty($is_success['error'])) {
-            if ($is_success['error']['code'] !== 200 &&
-                ($is_success['error']['code'] !== 100 &&
-                    $is_success['error']['code']['error_subcode'] !== 33)) {
+            $err_code = $is_success['error']['code'];
+            if ($err_code !== 200 && ($err_code !== 100 && $err_code['error_subcode'] !== 33)) {
                 return response('Có lỗi khi xóa bình luận!', 500);
             }
         }

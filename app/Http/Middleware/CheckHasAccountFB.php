@@ -19,7 +19,7 @@ class CheckHasAccountFB
         $user = User::find(auth()->id())->facebook->toArray();
         if (!empty($user)) {
             $aProvider_uid = array_column($user, 'provider_uid');
-            if ($pos = array_search($request->p_uid, $aProvider_uid)) {
+            if (($pos = array_search($request->p_uid, $aProvider_uid)) !== false) {
                 $request->request->add(['account' => $user[$pos]]);
                 return $next($request);
             }

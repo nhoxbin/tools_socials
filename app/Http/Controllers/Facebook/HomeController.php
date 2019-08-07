@@ -11,8 +11,8 @@ use Curl;
 class HomeController extends Controller
 {
     public function getPosts(Request $request, $p_uid, $type, $limit) {
-        if (!is_numeric($limit) || $limit < 10 || $limit > 200) {
-            return response('Bạn ko được lấy nhỏ hơn 10 và quá 200 bài viết!', 422);
+        if (!is_numeric($limit)) {
+            return response('Sai định dạng giới hạn bài viết!', 422);
         }
         // lấy bài viết
     	$url = mkurl(true, 'graph.facebook.com', 'me/home', [

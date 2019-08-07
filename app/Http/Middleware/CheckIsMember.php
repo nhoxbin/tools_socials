@@ -19,7 +19,7 @@ class CheckIsMember
     {
         $user = User::with('role', 'facebook')->where('id', auth()->id())->first()->toArray();
         // nếu member đã đăng nhập 1 nick fb, ko cho đăng nhập nữa
-        if (!empty($user['facebook']) && $user['role']['name'] === 'Member') {
+        if (!empty($user['facebook']) && ($user['role']['name'] === 'Member' || $user['role']['name'] === 'Undefined')) {
             return response('Bạn hãy nâng cấp VIP', 403);
         }
         return $next($request);

@@ -18,6 +18,6 @@ class CheckIsAdmin
         if(Auth::user()->role === 2)
             return $next($request);
         else
-            return response()->json(['error' => 'Unauthorized. Forbidden by Middleware'], 403);
+            return response('Unauthorized. Forbidden by Middleware', 403);
     }
 }
