@@ -9,7 +9,7 @@
         colClasses="md12 sm12 xs12">
         <v-list>
           <v-list-tile-title>
-            - Ấn "Dừng Auto" sẽ trở lại trạng thái ban đầu!
+            - Nếu số lượng comment muốn reply là 0 thì sẽ chỉ comment lên bài viết và nếu muốn reply comment thì sẽ chỉ reply comment (không comment lên bài viết)
           </v-list-tile-title>
         </v-list>
       </app-card>
@@ -51,10 +51,19 @@
                     <v-text-field
                       type="number"
                       :disabled="data.length > 0"
-                      v-model="comment_fields.limit"/>
+                      v-model="comment_fields.limit_posts"/>
                   </v-flex>
                   <v-flex md6 sm6 xs12 v-if="item.value === 'feed'">
-                    <span class="small pt-4 d-block">ID người dùng</span>
+                    <span class="small pt-4 d-block">số comment muốn reply trong 1 bài viết</span>
+                  </v-flex>
+                  <v-flex md6 sm6 xs12 v-if="item.value === 'feed'">
+                    <v-text-field
+                      :disabled="data.length > 0"
+                      v-model.lazy="comment_fields.limit_comments">
+                    </v-text-field>
+                  </v-flex>
+                  <v-flex md6 sm6 xs12 v-if="item.value === 'feed'">
+                    <span class="small pt-4 d-block">ID muốn comment</span>
                   </v-flex>
                   <v-flex md6 sm6 xs12 v-if="item.value === 'feed'">
                     <v-text-field
@@ -69,10 +78,11 @@
                       label="Nhập bình luận..."></v-textarea>
                   </v-flex>
                   <v-flex md12 sm12 xs12>
-                    <v-text-field outline
-                      v-model.lazy="comment_fields.url_picture"
+                    <upload-btn
+                      accept="image/*"
+                      @file-update="onImageChange"
                       :disabled="is_start"
-                      label="URL hình ảnh..."/>
+                      title="Chọn hình ảnh" />
                   </v-flex>
                 </v-layout>
               </v-card-title>
@@ -84,13 +94,13 @@
                   color="info"
                   :loading="loading"
                   :disabled="loading"
-                  @click="getData(selectedId, comment_fields.limit, uids)">Lấy bài viết
+                  @click="getData()">Lấy bài viết
                 </v-btn>
                 <v-btn v-else
                   color="success"
                   :loading="loading"
                   :disabled="loading"
-                  @click="startComment(selectedId, tab, data, comment_fields.message, comment_fields.url_picture)">Bắt đầu Comment
+                  @click="startComment()">Bắt đầu Comment
                 </v-btn>
                 <v-btn v-if="is_start"
                   color="warning"
@@ -105,7 +115,7 @@
                   color="warning"
                   :loading="loading"
                   :disabled="loading"
-                  @click="getCommentedId(selectedId, tab)">Lấy các bài viết đã Comment
+                  @click="getCommentedId()">Lấy các bài viết đã Comment
                 </v-btn>
                 <v-btn v-else
                   color="error"
@@ -139,9 +149,11 @@ export default {
       uids: '',
       commented_id: [],
       comment_fields: {
-        message: 'hello google',
-        url_picture: 'https://vnreview.vn/image/18/17/65/1817650.jpg',
-        limit: 10
+        message: '',
+        file: undefined,
+        url_picture: '',
+        limit_posts: 10,
+        limit_comments: 0
       }
     }
   },
@@ -170,20 +182,24 @@ export default {
         text: message
       });
     },
-    getData(p_uid, limit, uids) {
+    onImageChange(file) {
+      this.comment_fields.file = file;
+    },
+    getData() {
       this.loading = true;
       let url;
       if (this.tab === 'home') {
         url = route('facebook.home.getPosts', {
-          p_uid: p_uid,
+          p_uid: this.selectedId,
           type: 'page',
-          limit: limit
+          limit_posts: this.comment_fields.limit_posts
         });
       } else if (this.tab === 'feed') {
         url = route('facebook.feed.getPosts', {
-          p_uid: p_uid,
-          uids: uids,
-          limit: limit
+          p_uid: this.selectedId,
+          uids: this.uids,
+          limit_posts: this.comment_fields.limit_posts,
+          limit_comments: this.comment_fields.limit_comments
         });
       }
       Vue.http.get(url).then(res => res.json())
@@ -196,10 +212,21 @@ export default {
           this.VueNotify('error', error.body);
         });
     },
-    startComment(p_uid, tab, data, message, url_picture) {
+    async startComment() {
       this.is_start = true;
       this.loading = true;
-      sleep_loop(data, [5, 15], async(value, index) => {
+      
+      if (typeof this.comment_fields.file === 'object') {
+        var formData = new FormData();
+        formData.append('file', this.comment_fields.file);
+
+        await Vue.http.post(route('facebook.feed.uploadFile', this.selectedId), formData)
+          .then(res => {
+            this.comment_fields.url_picture = res.body;
+          })
+      }
+
+      sleep_loop(this.data, 2, async(value, index) => {
         if (this.is_start === false) {
           this.data = [];
           this.loading = false;
@@ -208,20 +235,19 @@ export default {
           return 'break';
         }
 
-        await Vue.http.post(route('facebook.comment.store', {
-          p_uid: p_uid,
+        await Vue.http.post(route('facebook.feed.comment', {
+          p_uid: this.selectedId,
+          object_id: value
         }), {
-          type: tab,
-          comment: message,
-          url_picture: url_picture,
-          posts_id: value
-        }).then((message) => {
+          comment: this.comment_fields.message,
+          url_picture: this.comment_fields.url_picture
+        }).then(message => {
             this.VueNotify('success', message.body);
-          }, (error) => {
+          }, error => {
             this.VueNotify('error', error.body);
           });
 
-        if (index === data.length-1) {
+        if (index === this.data.length-1) {
           this.data = [];
           this.loading = false;
           this.is_start = false;
@@ -229,11 +255,11 @@ export default {
         }
       });
     },
-    getCommentedId(p_uid, type) {
+    /*getCommentedId() {
       this.loading = true;
       Vue.http.get(route('facebook.comment.show', {
-        p_uid: p_uid,
-        type: type
+        p_uid: this.selectedId,
+        type: this.tab
       })).then(response => {
           this.commented_id = response.body;
           this.loading = false;
@@ -247,7 +273,7 @@ export default {
       this.loading = true;
       sleep_loop(commented_id, 1, async(val, index) => {
         await Vue.http.delete(route('facebook.comment.delete', {
-          p_uid: p_uid,
+          p_uid: this,
           type: type,
           commented_id: val
         })).then(status => {
@@ -262,7 +288,7 @@ export default {
           alert('Xong!!!');
         }
       });
-    }
+    }*/
   }
 }
 </script>

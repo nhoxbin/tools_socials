@@ -78,22 +78,19 @@ Route::group([
             Route::post('/out', 'GroupsController@out')->name('out');
         });*/
 
-        Route::resource('comment', 'CommentController', [
-            'names' => 'comment',
-            'only' => ['index', 'show', 'store'],
-            'parameters' => ['comment' => 'type']
-        ]);
-        Route::delete('comment/{type}/delete/{commented_id}', 'CommentController@delete')->name('comment.delete');
-
-        // lấy bài viết trên tường nhà của 1 hoặc nhiều user
-        Route::get('feed/{uids}/posts/{limit}', 'FeedController@getPosts')
-            ->where('limit', '[0-9]+')
-            ->name('feed.getPosts');
+        Route::post('get_url_file', 'FeedController@getURLFile')->name('feed.uploadFile');
+        Route::post('feed/{object_id}/comment', 'FeedController@comment')
+            ->name('feed.comment');
 
         // lấy bài viết trên newfeed với type là page hoặc user
         Route::get('home/{type}/posts/{limit}', 'HomeController@getPosts')
             ->where('limit', '[0-9]+')
             ->name('home.getPosts');
+
+        // lấy bài viết trên tường nhà của 1 hoặc nhiều user
+        Route::get('feed/{uids}/posts/{limit_posts}/{limit_comments}', 'FeedController@getPosts')
+            ->where(['limit_posts' => '[0-9]+', 'limit_comments' => '[0-9]+'])
+            ->name('feed.getPosts');
     });
 });
 

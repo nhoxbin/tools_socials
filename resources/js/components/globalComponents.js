@@ -7,6 +7,9 @@ import {
 	RotateSquare2
 } from "vue-loading-spinner";
 
+// Upload Button
+import VueUploadButton from 'vuetify-upload-button';
+
 // delete Confirmation Dialog
 import DeleteConfirmationDialog from "Components/DeleteConfirmationDialog/DeleteConfirmationDialog";
 
@@ -34,6 +37,7 @@ const GlobalComponents = {
 		Vue.component('appSectionLoader', AppSectionLoader);
 		Vue.component('pageTitleBar', PageTitleBar);
 		Vue.component('rotateSquare2', RotateSquare2);
+		Vue.component('uploadBtn', VueUploadButton);
 	}
 }
 

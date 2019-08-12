@@ -14,9 +14,9 @@ class CreateFacebookAccountsTable extends Migration
     public function up()
     {
         Schema::create('facebook_accounts', function (Blueprint $table) {
-            $table->string('provider_uid', 20)->primary();
+            $table->unsignedDecimal('provider_uid', 20, 0)->primary();
             $table->string('name', 100)->nullable();
-            $table->text('access_token', 255)->nullable();
+            $table->string('access_token', 255)->nullable();
             $table->text('cookie', 100)->nullable();
             $table->boolean('is_active');
             $table->string('status')->nullable();

@@ -21,10 +21,10 @@
   <title>{{ config('app.name') }}</title>
 
   <script>
-        window.Laravel = {!! json_encode([
-            'csrfToken' => csrf_token(),
-        ]) !!};
-    </script>
+    window.Laravel = {!! json_encode([
+      'csrfToken' => csrf_token(),
+    ]) !!};
+  </script>
 </head>
 
 <body>

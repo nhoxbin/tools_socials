@@ -10,34 +10,145 @@ use Session;
 
 class FeedController extends Controller
 {
-	public function getPosts(Request $request, $p_uid, $uids, $limit) {
-		if (!is_numeric($limit)) {
-			return response('Sai định dạng giới hạn bài viết!', 422);
+	public function getPosts(Request $request, $p_uid, $uids, $limit_posts, $limit_comments) {
+		if (empty($uids)) {
+			return response('Bạn chưa điền ID người lấy bài viết!', 422);
 		}
 
     	$url = mkurl(true, 'graph.facebook.com', 'feed', [
     		'ids' => $uids,
-    		'fields' => 'id',
-    		'limit' => $limit,
+    		'fields' => ($limit_comments === 0 ? 'id,actions' : "id,actions,comments.limit($limit_comments){can_comment}"),
+    		'limit' => $limit_posts,
 			'access_token' => $request->account['access_token']
 		]);
-    	$data = json_decode(Curl::to($url)->withHeader('User-Agent', agent())->get(), true);
-    	if (!empty($data['error'])) {
-    		return response('Có lỗi khi lấy bài viết, kiểm tra lại ID!', 500);
+    	$data = json_decode(Curl::to($url)->get(), true);
+    	if (empty($data) || !empty($data['error'])) {
+    		return response('Có lỗi khi lấy bài viết!', 500);
     	}
-
-    	$posts = [];
+    	$object_id = [];
     	foreach ($data as $id => $value) {
-    		$user_posts = array_column($value['data'], 'id');
-    		foreach ($user_posts as $value) {
-    			array_push($posts, $value);
+    		foreach ($value['data'] as $item) {
+    			if ($item['actions'][0]['name'] === 'Comment') {
+	    			// lấy những bài viết có thể comment
+					array_push($object_id, $item['id']);
+    				if (!empty($item['comments'])) {
+    					// lấy những comment có thể reply
+    					foreach ($item['comments']['data'] as $comment) {
+    						if ($comment['can_comment'] === true) {
+    							array_push($object_id, $comment['id']);
+    						}
+    					}
+    				}
+    			}
     		}
     	}
 
-    	return $posts;
+    	return $object_id;
     }
 	
-	private function getReactions($url, array $reactions) {
+	public function getURLFile(Request $request) {
+		if ($request->file->isValid()) {
+			$link = upanh($request->file->getPathname());
+			return response($link, 200);
+		}
+	}
+
+	private function postUnPublishedPhotos($url_picture, $access_token) {
+    	$url = mkurl(true, 'graph.facebook.com', 'me/photos', [
+    		'url' => $url_picture,
+    		'published' => 'false',
+    		'access_token' => $access_token
+    	]);
+    	$data = json_decode(Curl::to($url)->post(), true);
+    	if (!empty($data['error'])) {
+    		return ['is_success' => false, 'message' => $data['error']['message']];
+    	}
+    	return $data['id'];
+    }
+
+    private function replies_posts($object_id, $message, $url_picture, $account) {
+    	// $m_facebook = 'https://m.facebook.com/';
+    	// preg_match('/action="(.+?)"/m', $curl, $link);
+    	$url = mkurl(true, 'graph.facebook.com', "$object_id/comments", [
+    		'message' => $message,
+    		'attachment_url' => $url_picture,
+    		'access_token' => $account['access_token']
+    	]);
+    	$curl = json_decode(Curl::to($url)->post(), true);
+    	if (!empty($curl['error'])) {
+    		return false;
+    	}
+    	return true;
+    }
+
+    private function replies_comment($object_id, $message, $picId, $account) {
+    	$m_facebook = 'https://m.facebook.com/';
+    	$header = [
+    		'Cookie: ' . $account['cookie'],
+    		'User-Agent: ' . agent()
+    	];
+        $curl = Curl::to($m_facebook . $object_id)
+        	->withHeaders($header)
+        	->allowRedirect()
+        	->get();
+        preg_match('/fb_dtsg" value="(.+?)".+?jazoest" value="(.+?)"/m', $curl, $data_send);
+        if (empty($data_send)) {
+        	return false; // Không lấy được thông tin
+        }
+        // lấy thông tin
+        $data = [
+    		'fb_dtsg' => $data_send['1'],
+    		'jazoest' => $data_send['2'],
+    		'comment_text' => $message,
+    		'photo_ids' => $picId
+    	];
+    	preg_match('/"\/comment\/replies.+?gfid=(.+?)&amp;/', $curl, $gfid);
+
+    	$object = explode('_', $object_id);
+    	$posts_id = $object[0];
+    	$comment_id = $object[1];
+    	$params = [
+    		'parent_comment_id' => $comment_id,
+    		'parent_redirect_comment_token' => $object_id,
+    		'ft_ent_identifier' => $posts_id,
+    		'gfid' => $gfid[1]
+    	];
+    	$url = $m_facebook . 'a/comment.php?' . http_build_query($params);
+		$curl = Curl::to($url)
+			->withHeaders($header)
+			->withData($data)
+			->post();
+		return true;
+    }
+
+    public function comment(Request $request) {
+    	if (!empty($request->url_picture)) {
+	        $picId = $this->postUnPublishedPhotos($request->url_picture, $request->account['access_token']);
+	        if (!empty($picId['is_success']) && $picId['is_success'] === false) {
+	        	return response($picId['message'], 500);
+	        }
+    	}
+
+        // xem id là 1 bài viết hay 1 comment
+        $url = mkurl(true, 'graph.facebook.com', $request->object_id, [
+        	'access_token' => $request->account['access_token']
+        ]);
+        $curl = json_decode(Curl::to($url)->get(), true);
+        if (!empty($curl['error'])) {
+        	return response('không lấy được thông tin bài viết.', 500);
+        }
+        if (isset($curl['message'])) {
+        	$status = $this->replies_comment($request->object_id, $request->comment, $picId ?? null, $request->account);
+        } else {
+        	$status = $this->replies_posts($request->object_id, $request->comment, $request->url_picture, $request->account);
+        }
+        if ($status === false) {
+        	return response('Thất bại', 500);
+        }
+        return response('Bình luận thành công!', 200);
+    }
+
+	/*private function getReactions($url, array $reactions) {
 		// get data and paging in feed
 		$feed = json_decode(Curl::to($url)->get(), true);
 		if (isset($feed['error'])) {
@@ -179,9 +290,9 @@ class FeedController extends Controller
 		}
 
 		return back()->with('success', 'Đăng bài thành công. <a href="https://fb.com/' . $feed['id'] . '" target="_blank">Ấn vào đây</a> để xem bài viết của bạn');
-	}
+	}*/
 
-	public function postUnPublishedPhotos($files, $captions, $social) {
+	/*public function postUnPublishedPhotos($files, $captions, $social) {
 		$photos = [];
 		$attached_media = [];
 		$media_fbid = [];
@@ -205,22 +316,5 @@ class FeedController extends Controller
 		}
 		$attached = array_combine($attached_media, $media_fbid);
 		return $attached;
-	}
-
-	public function deleteStatus($uid, $idStatus) {
-		$user = Social::where('provider_uid', $uid)->get()->first();
-		if (!$user) {
-			return back()->with('error', 'User không tồn tại trong hệ thống');
-		}
-		$user = $user->toArray();
-
-		$url_del_stt = mkurl(true, 'graph.facebook.com', $idStatus, [
-			'access_token' => $user['access_token']
-		]);
-		$delstt = json_decode(Curl::to($url_del_stt)->delete(), true);
-		if ($delstt === true) {
-			return back()->with(['success' => 'Xóa bài viết thành công !', 'del' => true]);
-		}
-		return back()->with('error', 'Có lỗi xảy ra khi xóa bài viết !');
-	}
+	}*/
 }
