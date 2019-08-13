@@ -145,7 +145,7 @@ export default {
       ],
       is_start: false,
       loading: false,
-      data: [],
+      data: ['118296656171131_118306016170195', '118296656171131_118313009502829', '117552879578842_117649856235811'],
       uids: '',
       commented_id: [],
       comment_fields: {
@@ -223,6 +223,7 @@ export default {
         await Vue.http.post(route('facebook.feed.uploadFile', this.selectedId), formData)
           .then(res => {
             this.comment_fields.url_picture = res.body;
+            this.VueNotify('success', 'Lấy url hình ảnh thành công!');
           })
       }
 

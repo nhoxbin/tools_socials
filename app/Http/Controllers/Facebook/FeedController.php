@@ -93,16 +93,16 @@ class FeedController extends Controller
         	->get();
         preg_match('/fb_dtsg" value="(.+?)".+?jazoest" value="(.+?)"/m', $curl, $data_send);
         if (empty($data_send)) {
-        	return false; // Không lấy được thông tin
+        	return false;
         }
         // lấy thông tin
         $data = [
-    		'fb_dtsg' => $data_send['1'],
-    		'jazoest' => $data_send['2'],
+    		'fb_dtsg' => $data_send[1] ?? $fb_dtsg,
+    		'jazoest' => $data_send[2] ?? $jazoest,
     		'comment_text' => $message,
     		'photo_ids' => $picId
     	];
-    	preg_match('/"\/comment\/replies.+?gfid=(.+?)&amp;/', $curl, $gfid);
+    	// preg_match('/"\/comment\/replies.+?gfid=(.+?)&amp;/', $curl, $gfid);
 
     	$object = explode('_', $object_id);
     	$posts_id = $object[0];
@@ -110,14 +110,15 @@ class FeedController extends Controller
     	$params = [
     		'parent_comment_id' => $comment_id,
     		'parent_redirect_comment_token' => $object_id,
-    		'ft_ent_identifier' => $posts_id,
-    		'gfid' => $gfid[1]
+    		'ft_ent_identifier' => $posts_id
     	];
+
     	$url = $m_facebook . 'a/comment.php?' . http_build_query($params);
 		$curl = Curl::to($url)
 			->withHeaders($header)
 			->withData($data)
 			->post();
+
 		return true;
     }
 
@@ -137,13 +138,13 @@ class FeedController extends Controller
         if (!empty($curl['error'])) {
         	return response('không lấy được thông tin bài viết.', 500);
         }
-        if (isset($curl['message'])) {
+        if (isset($curl['from'])) {
         	$status = $this->replies_comment($request->object_id, $request->comment, $picId ?? null, $request->account);
         } else {
         	$status = $this->replies_posts($request->object_id, $request->comment, $request->url_picture, $request->account);
         }
         if ($status === false) {
-        	return response('Thất bại', 500);
+        	return response('Không lấy được thông tin bài viết!', 500);
         }
         return response('Bình luận thành công!', 200);
     }
