@@ -145,7 +145,7 @@ export default {
       ],
       is_start: false,
       loading: false,
-      data: ['118296656171131_118306016170195', '118296656171131_118313009502829', '117552879578842_117649856235811'],
+      data: [],
       uids: '',
       commented_id: [],
       comment_fields: {

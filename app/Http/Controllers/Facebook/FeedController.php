@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Facebook;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use App\Http\Controllers\Controller;
 use App\FBAccount;
 use Curl;
@@ -66,12 +67,14 @@ class FeedController extends Controller
     	return $data['id'];
     }
 
-    private function replies_posts($object_id, $message, $url_picture, $account) {
+    private function replies_posts($sender) {
+    	extract($sender, EXTR_PREFIX_SAME, 'wddx');
+
     	// $m_facebook = 'https://m.facebook.com/';
     	// preg_match('/action="(.+?)"/m', $curl, $link);
     	$url = mkurl(true, 'graph.facebook.com', "$object_id/comments", [
-    		'message' => $message,
-    		'attachment_url' => $url_picture,
+    		'message' => $comment,
+    		'attachment_url' => $picture,
     		'access_token' => $account['access_token']
     	]);
     	$curl = json_decode(Curl::to($url)->post(), true);
@@ -81,29 +84,35 @@ class FeedController extends Controller
     	return true;
     }
 
-    private function replies_comment($object_id, $message, $picId, $account) {
+    private function replies_comment($request, $sender) {
+    	extract($sender, EXTR_PREFIX_SAME, 'wddx');
+
     	$m_facebook = 'https://m.facebook.com/';
     	$header = [
     		'Cookie: ' . $account['cookie'],
     		'User-Agent: ' . agent()
     	];
-        $curl = Curl::to($m_facebook . $object_id)
-        	->withHeaders($header)
-        	->allowRedirect()
-        	->get();
-        preg_match('/fb_dtsg" value="(.+?)".+?jazoest" value="(.+?)"/m', $curl, $data_send);
-        if (empty($data_send)) {
-        	return false;
-        }
+    	// nếu ko có dữ liệu fb_dtsg và jazoest thì Curl để lấy
+    	if (empty($request->cookie('fb_dtsg')) && empty($request->cookie('jazoest'))) {
+	        $curl = Curl::to($m_facebook . $object_id)
+	        	->withHeaders($header)
+	        	->allowRedirect()
+	        	->get();
+	        preg_match('/fb_dtsg" value="(.+?)".+?jazoest" value="(.+?)"/m', $curl, $data_send);
+	        if (empty($data_send)) {
+	        	return false;
+	        }
+    	} else {
+    		$fb_dtsg = $request->cookie('fb_dtsg');
+    		$jazoest = $request->cookie('jazoest');
+    	}
         // lấy thông tin
         $data = [
     		'fb_dtsg' => $data_send[1] ?? $fb_dtsg,
     		'jazoest' => $data_send[2] ?? $jazoest,
-    		'comment_text' => $message,
-    		'photo_ids' => $picId
+    		'comment_text' => $comment,
+    		'photo_ids' => $picture
     	];
-    	// preg_match('/"\/comment\/replies.+?gfid=(.+?)&amp;/', $curl, $gfid);
-
     	$object = explode('_', $object_id);
     	$posts_id = $object[0];
     	$comment_id = $object[1];
@@ -117,9 +126,19 @@ class FeedController extends Controller
 		$curl = Curl::to($url)
 			->withHeaders($header)
 			->withData($data)
+			->allowRedirect()
 			->post();
 
-		return true;
+		if (!preg_match('/'.$object_id.'/', $curl)) {
+			// nếu ko comment được, nếu có 2 cookie thì flush và request again
+			if ($request->cookie('fb_dtsg') && $request->cookie('jazoest')) {
+				Cookie::forget('fb_dtsg');
+				Cookie::forget('jazoest');
+			}
+			$this->replies_comment($request, $sender);
+		}
+
+		return ['fb_dtsg' => $data['fb_dtsg'], 'jazoest' => $data['jazoest']];
     }
 
     public function comment(Request $request) {
@@ -136,15 +155,30 @@ class FeedController extends Controller
         ]);
         $curl = json_decode(Curl::to($url)->get(), true);
         if (!empty($curl['error'])) {
-        	return response('không lấy được thông tin bài viết.', 500);
+        	return response($curl['error']['message'], 500);
         }
+
+        $sender = [
+        	'object_id' => $request->object_id,
+        	'comment' => $request->comment,
+        	'picture' => '',
+        	'account' => $request->account
+        ];
         if (isset($curl['from'])) {
-        	$status = $this->replies_comment($request->object_id, $request->comment, $picId ?? null, $request->account);
+        	$sender['picture'] = $picId ?? null;
+        	$status = $this->replies_comment($request, $sender);
         } else {
-        	$status = $this->replies_posts($request->object_id, $request->comment, $request->url_picture, $request->account);
+        	$sender['picture'] = $request->url_picture;
+        	$status = $this->replies_posts($sender);
         }
         if ($status === false) {
         	return response('Không lấy được thông tin bài viết!', 500);
+        }
+
+        if (!empty($status['fb_dtsg']) && !empty($status['jazoest'])) {
+        	return response(['Bình luận thành công!', $status['fb_dtsg']], 200)
+        		->withCookie(cookie('fb_dtsg', $status['fb_dtsg'], 20))
+        		->withCookie(cookie('jazoest', $status['jazoest'], 20));
         }
         return response('Bình luận thành công!', 200);
     }
